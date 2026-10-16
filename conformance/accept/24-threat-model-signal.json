@@ -1,0 +1,181 @@
+{
+ "description": "A threat-model signal judged as of the head commit's date carries `threat-model:expired` on the changed path of a component whose judgement expired, which the policy makes high.",
+ "expected": {
+  "change_type": "normal",
+  "complete": true,
+  "emergency": null,
+  "facts_digest": "sha256:3a7d94aae7e4c2cb2ce10626241d99b9684dfeebca94339ff5f2133b84f9015c",
+  "labels": [
+   {
+    "label": "component:session",
+    "paths": [
+     "src/session/store.rs"
+    ],
+    "sources": [
+     "map"
+    ]
+   },
+   {
+    "label": "threat-model:expired",
+    "paths": [
+     "src/session/store.rs"
+    ],
+    "sources": [
+     "signal:threat-model"
+    ]
+   }
+  ],
+  "level": "high",
+  "reasons": [
+   {
+    "code": "CR008",
+    "level": "low"
+   },
+   {
+    "code": "CR001",
+    "label": "threat-model:expired",
+    "level": "high",
+    "paths": [
+     "src/session/store.rs"
+    ]
+   }
+  ],
+  "requirements": {
+   "min_human_approvals": 2,
+   "required_reviewer_teams": [
+    "acme/security"
+   ]
+  },
+  "tier": "high"
+ },
+ "facts": {
+  "change": {
+   "base": "1111111111111111111111111111111111111111",
+   "head": "3333333333333333333333333333333333333333",
+   "id": "github:acme/api:pr:7",
+   "merge_base": "2222222222222222222222222222222222222222",
+   "url": null
+  },
+  "generated": {
+   "tool": "conformance",
+   "version": "1"
+  },
+  "map": {
+   "paths": [
+    {
+     "labels": [
+      "auth"
+     ],
+     "pattern": "/src/auth/"
+    },
+    {
+     "labels": [
+      "payments",
+      "personal-data"
+     ],
+     "pattern": "/src/payments/"
+    },
+    {
+     "labels": [
+      "migrations"
+     ],
+     "pattern": "/db/"
+    },
+    {
+     "labels": [
+      "infra"
+     ],
+     "pattern": "*.tf"
+    },
+    {
+     "labels": [
+      "component:session"
+     ],
+     "pattern": "/src/session/"
+    }
+   ],
+   "version": "0.1"
+  },
+  "paths": [
+   "src/session/store.rs"
+  ],
+  "policy": {
+   "default_level": "low",
+   "emergency": {
+    "declarers": [
+     "alice",
+     "team:acme/sre"
+    ],
+    "label": "emergency"
+   },
+   "levels": {
+    "auth": "high",
+    "infra": "standard",
+    "migrations": "standard",
+    "payments": "high",
+    "personal-data": "standard",
+    "sarif:error": "high",
+    "threat-model:expired": "high"
+   },
+   "missing_tier": "standard",
+   "standard_changes": [
+    {
+     "name": "documentation",
+     "paths": [
+      "/docs/",
+      "*.md"
+     ]
+    }
+   ],
+   "tiers": {
+    "emergency": {
+     "min_human_approvals": 0,
+     "retroactive_review_within_days": 3
+    },
+    "high": {
+     "min_human_approvals": 2,
+     "required_reviewer_teams": [
+      "acme/security"
+     ]
+    },
+    "low": {
+     "agent_review": "allowed",
+     "min_human_approvals": 1
+    },
+    "standard": {
+     "min_human_approvals": 1
+    }
+   },
+   "version": "0.1"
+  },
+  "signals": [
+   {
+    "as_of": "2026-10-01",
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "file": ".noru/threat-model.yml",
+    "kind": "threat-model",
+    "labels": [
+     {
+      "label": "threat-model:expired",
+      "paths": [
+       "src/session/store.rs"
+      ]
+     }
+    ]
+   }
+  ],
+  "sources": {
+   "map": {
+    "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": ".change-risk/map.yml",
+    "revision": "1111111111111111111111111111111111111111"
+   },
+   "policy": {
+    "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": ".change-risk/policy.yml",
+    "revision": "1111111111111111111111111111111111111111"
+   }
+  },
+  "version": "0.1"
+ }
+}

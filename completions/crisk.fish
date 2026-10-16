@@ -47,7 +47,7 @@ complete -c crisk -n "__fish_crisk_using_subcommand collect" -l base -d 'The tar
 complete -c crisk -n "__fish_crisk_using_subcommand collect" -l head -d 'The change\'s head (default: the forge change\'s head, else HEAD)' -r
 complete -c crisk -n "__fish_crisk_using_subcommand collect" -l checkout -d 'The local clone' -r -F
 complete -c crisk -n "__fish_crisk_using_subcommand collect" -l declarations -d 'Declarations from a YAML file instead of the change\'s description' -r -F
-complete -c crisk -n "__fish_crisk_using_subcommand collect" -l signal -d 'A signal file: sarif=PATH, privacy-datamap=PATH or acc=PATH (repeatable)' -r
+complete -c crisk -n "__fish_crisk_using_subcommand collect" -l signal -d 'A signal file: sarif=PATH, privacy-datamap=PATH, acc=PATH or threat-model=PATH (repeatable)' -r
 complete -c crisk -n "__fish_crisk_using_subcommand collect" -s o -l output -d 'Write the facts to FILE instead of stdout' -r -F
 complete -c crisk -n "__fish_crisk_using_subcommand collect" -s q -l quiet -d 'Suppress status lines on stderr'
 complete -c crisk -n "__fish_crisk_using_subcommand collect" -s h -l help -d 'Print help'
@@ -76,7 +76,7 @@ complete -c crisk -n "__fish_crisk_using_subcommand assess" -l base -d 'The targ
 complete -c crisk -n "__fish_crisk_using_subcommand assess" -l head -d 'The change\'s head (default: the forge change\'s head, else HEAD)' -r
 complete -c crisk -n "__fish_crisk_using_subcommand assess" -l checkout -d 'The local clone' -r -F
 complete -c crisk -n "__fish_crisk_using_subcommand assess" -l declarations -d 'Declarations from a YAML file instead of the change\'s description' -r -F
-complete -c crisk -n "__fish_crisk_using_subcommand assess" -l signal -d 'A signal file: sarif=PATH, privacy-datamap=PATH or acc=PATH (repeatable)' -r
+complete -c crisk -n "__fish_crisk_using_subcommand assess" -l signal -d 'A signal file: sarif=PATH, privacy-datamap=PATH, acc=PATH or threat-model=PATH (repeatable)' -r
 complete -c crisk -n "__fish_crisk_using_subcommand assess" -s o -l output -d 'Write the facts to FILE instead of stdout' -r -F
 complete -c crisk -n "__fish_crisk_using_subcommand assess" -s f -l format -d 'Output format; inferred from the --output name when omitted, else `table`' -r -f -a "json\t'The assessment, as RFC 8785 JSON'
 table\t'A summary for people'

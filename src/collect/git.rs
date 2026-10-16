@@ -2,7 +2,7 @@
 //! file as it stood at a revision.
 
 use crate::{Exit, failure_with_hint};
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -91,6 +91,19 @@ impl Git {
         paths.sort();
         paths.dedup();
         Ok(paths)
+    }
+
+    /// The commit's committer date, as a UTC calendar date (`YYYY-MM-DD`).
+    pub fn committed_on(&self, rev: &str) -> Result<String> {
+        let rev = plain(rev)?;
+        let out = self.ok(&["log", "-1", "--format=%ct", rev, "--"])?;
+        let seconds: i64 = String::from_utf8_lossy(&out)
+            .trim()
+            .parse()
+            .context("git log did not print a commit time")?;
+        let at = chrono::DateTime::<chrono::Utc>::from_timestamp(seconds, 0)
+            .context("the commit time is out of range")?;
+        Ok(at.format("%Y-%m-%d").to_string())
     }
 
     /// The bytes of `path` at `rev`, or None when it does not exist there.

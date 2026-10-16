@@ -107,7 +107,7 @@ pub struct CollectArgs {
     /// Declarations from a YAML file instead of the change's description.
     #[arg(long, value_name = "FILE")]
     pub declarations: Option<PathBuf>,
-    /// A signal file: sarif=PATH, privacy-datamap=PATH or acc=PATH (repeatable).
+    /// A signal file: sarif=PATH, privacy-datamap=PATH, acc=PATH or threat-model=PATH (repeatable).
     #[arg(long, value_name = "KIND=PATH")]
     pub signal: Vec<String>,
     /// Write the facts to FILE instead of stdout.

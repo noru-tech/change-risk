@@ -163,6 +163,82 @@ fn signals_label_changed_files() {
 }
 
 #[test]
+fn threat_model_signal_raises_changes_to_expired_or_unmodelled_components() {
+    // The map, read from main, ties paths to threat-model components; every fixture commit is
+    // committed on 2026-10-01, the date the judgements are held against.
+    let r = Repo::new();
+    r.write(
+        ".change-risk/map.yml",
+        "version: \"0.1\"\npaths:\n  - pattern: /infra/assets/\n    labels: [\"component:assets-bucket\"]\n  - pattern: /src/session/\n    labels: [\"component:session\"]\n  - pattern: /src/search/\n    labels: [\"component:search\"]\n",
+    );
+    r.write(
+        ".change-risk/policy.yml",
+        "version: \"0.1\"\ndefault_level: low\nlevels:\n  threat-model:expired: high\n  threat-model:unmodelled: standard\ntiers:\n  low: {min_human_approvals: 1}\n  standard: {min_human_approvals: 1}\n  high: {min_human_approvals: 2}\nmissing_tier: standard\n",
+    );
+    r.write("infra/assets/bucket.tf", "bucket {}\n");
+    r.write("src/session/store.rs", "fn store() {}\n");
+    r.write("src/search/index.rs", "fn index() {}\n");
+    r.commit("base");
+    r.git(&["checkout", "-q", "-b", "feature"]);
+    let manifest = r.path().join("threat-model.yml");
+    std::fs::write(
+        &manifest,
+        "piece: threat-model\nrisks:\n  - target: {kind: component, id: assets-bucket}\n    interpretation: {expires_at: \"2026-09-30\"}\n  - target: {kind: component, id: session}\n    interpretation: {expires_at: \"2026-10-01\"}\n",
+    )
+    .unwrap();
+    let signal = format!("threat-model={}", manifest.display());
+
+    // Touching the session component only: its judgement stands on its expiry day.
+    r.write("src/session/store.rs", "fn store() { save() }\n");
+    r.commit("session");
+    let (_, a) = assess(&r, "main", &["--signal", &signal]);
+    assert_eq!(a["tier"], "low");
+    assert_eq!(a["facts"]["signals"][0]["as_of"], "2026-10-01");
+    assert!(
+        a["facts"]["signals"][0]["labels"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+
+    // The search component is in the map but nobody modelled it.
+    r.write("src/search/index.rs", "fn index() { rank() }\n");
+    r.commit("search");
+    let (_, a) = assess(&r, "main", &["--signal", &signal]);
+    assert_eq!(a["tier"], "standard");
+
+    // The assets bucket's judgement expired the day before the head commit.
+    r.write("infra/assets/bucket.tf", "bucket { public = false }\n");
+    r.commit("assets");
+    let (_, a) = assess(&r, "main", &["--signal", &signal]);
+    assert_eq!(a["tier"], "high");
+    let labels: Vec<(&str, Vec<&str>)> = a["labels"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|l| {
+            (
+                l["label"].as_str().unwrap(),
+                l["paths"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|p| p.as_str().unwrap())
+                    .collect(),
+            )
+        })
+        .filter(|(l, _)| l.starts_with("threat-model:"))
+        .collect();
+    assert_eq!(
+        labels,
+        [
+            ("threat-model:expired", vec!["infra/assets/bucket.tf"]),
+            ("threat-model:unmodelled", vec!["src/search/index.rs"]),
+        ]
+    );
+}
+
+#[test]
 fn outputs_render_and_validate() {
     let (repo, _) = configured();
     repo.write("src/auth/login.rs", "fn login() { check() }\n");

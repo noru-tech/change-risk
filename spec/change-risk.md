@@ -141,6 +141,10 @@ A signal is another tool's output, read by a documented adapter that turns it in
 | `sarif` | SARIF 2.1.0 | `sarif:error`, `sarif:warning`, `sarif:note`: a result's level (default `warning`; `none` is skipped) on each changed file it is located in |
 | `privacy-datamap` | A Noru `privacy-datamap` manifest | `personal-data` on each changed file a collection or privacy declaration with data categories cites; `personal-data:special` as well when a category is at or below a special category (§2.7.1) |
 | `acc` | An agent-change-control manifest | On every changed path: `agent-authored` when the change whose `head_sha` is the head has an `agent:` author; `acc:finding` when that change has a finding whose disposition is open |
+| `threat-model` | A Noru `threat-model` manifest | On each changed path whose map labels include `component:ID`: `threat-model:expired` when a risk on target `ID` has an interpretation `expires_at` before the signal's `as_of`; `threat-model:unmodelled` when no risk on target `ID` has an interpretation with an `expires_at` date (§2.7.2) |
+
+A signal records the kind, the file name and the SHA-256 of the file's bytes. An adapter that judges
+dated facts also records the date it judged them against, `as_of` (`YYYY-MM-DD`, UTC).
 
 #### 2.7.1 Special categories
 
@@ -149,6 +153,14 @@ A signal is another tool's output, read by a documented adapter that turns it in
 `user.demographic.religious_belief`, `user.demographic.sexual_orientation`,
 `user.health_and_medical`: GDPR Article 9 data and Article 10 criminal-offence data in the
 Fideslang taxonomy.
+
+#### 2.7.2 Threat models
+
+The map ties paths to threat-model components with labels `component:ID`, read from the base
+revision like every map label. `as_of` is the head commit's committer date in UTC, read by the
+collector, so the labels depend only on the change and the manifest. A risk's judgement stands on
+its `expires_at` day and has expired after it. A risk whose interpretation has no `expires_at` date
+is not a judgement.
 
 ## 3. Facts
 

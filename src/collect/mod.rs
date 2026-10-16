@@ -126,12 +126,30 @@ pub fn collect(opts: Options) -> Result<Facts> {
         teams.sort_by(|a, b| a.id.cmp(&b.id));
     }
 
+    // Only the threat-model adapter judges a date, and it judges the head commit's: the same
+    // change gets the same labels however late it is collected.
+    let head_date = if opts.signals.iter().any(|(kind, _)| kind == "threat-model") {
+        Some(git.committed_on(&head)?)
+    } else {
+        None
+    };
+    let context = crate::signals::SignalContext {
+        map: map.as_ref(),
+        head_date: head_date.as_deref(),
+    };
     let mut signals = Vec::new();
     for (kind, path) in &opts.signals {
         let bytes =
             std::fs::read(path).with_context(|| format!("unable to read {}", path.display()))?;
-        let signal = crate::signals::read(kind, &path.display().to_string(), &bytes, &paths, &head)
-            .with_context(|| format!("signal {kind}={}", path.display()))?;
+        let signal = crate::signals::read(
+            kind,
+            &path.display().to_string(),
+            &bytes,
+            &paths,
+            &head,
+            context,
+        )
+        .with_context(|| format!("signal {kind}={}", path.display()))?;
         signals.push(signal);
     }
 
