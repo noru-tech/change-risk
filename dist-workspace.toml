@@ -26,7 +26,7 @@ install-updater = false
 # (the tap push needs a HOMEBREW_TAP_TOKEN repository secret with contents:write on the tap).
 formula = "crisk"
 tap = "noru-tech/homebrew-tap"
-publish-jobs = ["homebrew"]
+publish-jobs = ["homebrew", "./publish-crates"]
 # Sign release artifacts with GitHub artifact attestations
 github-attestations = true
 # Attach a CycloneDX SBOM to every release, built by cargo-cyclonedx
@@ -41,3 +41,7 @@ allow-dirty = ["ci"]
 
 [dist.github-custom-runners]
 aarch64-unknown-linux-musl = "ubuntu-24.04-arm"
+
+# crates.io trusted publishing needs only the OIDC token and a checkout, not the default packages:write.
+[dist.github-custom-job-permissions]
+"publish-crates" = { id-token = "write", contents = "read" }
