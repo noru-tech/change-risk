@@ -42,7 +42,7 @@ _arguments "${_arguments_options[@]}" : \
 '--head=[The change'\''s head (default\: the forge change'\''s head, else HEAD)]:REV:_default' \
 '--checkout=[The local clone]:DIR:_files' \
 '--declarations=[Declarations from a YAML file instead of the change'\''s description]:FILE:_files' \
-'*--signal=[A signal file\: sarif=PATH, privacy-datamap=PATH or acc=PATH (repeatable)]:KIND=PATH:_default' \
+'*--signal=[A signal file\: sarif=PATH, privacy-datamap=PATH, acc=PATH or threat-model=PATH (repeatable)]:KIND=PATH:_default' \
 '-o+[Write the facts to FILE instead of stdout]:FILE:_files' \
 '--output=[Write the facts to FILE instead of stdout]:FILE:_files' \
 '-q[Suppress status lines on stderr]' \
@@ -91,7 +91,7 @@ _arguments "${_arguments_options[@]}" : \
 '--head=[The change'\''s head (default\: the forge change'\''s head, else HEAD)]:REV:_default' \
 '--checkout=[The local clone]:DIR:_files' \
 '--declarations=[Declarations from a YAML file instead of the change'\''s description]:FILE:_files' \
-'*--signal=[A signal file\: sarif=PATH, privacy-datamap=PATH or acc=PATH (repeatable)]:KIND=PATH:_default' \
+'*--signal=[A signal file\: sarif=PATH, privacy-datamap=PATH, acc=PATH or threat-model=PATH (repeatable)]:KIND=PATH:_default' \
 '-o+[Write the facts to FILE instead of stdout]:FILE:_files' \
 '--output=[Write the facts to FILE instead of stdout]:FILE:_files' \
 '-f+[Output format; inferred from the --output name when omitted, else \`table\`]:FORMAT:((json\:"The assessment, as RFC 8785 JSON"

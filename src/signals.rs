@@ -7,8 +7,10 @@
 //! | `sarif` | A SARIF 2.1.0 log | `sarif:error`, `sarif:warning`, `sarif:note` on the changed files a result is located in |
 //! | `privacy-datamap` | A Noru `privacy-datamap` manifest (`.noru/privacy-datamap.yml`) | `personal-data` on changed files a collection or declaration cites; `personal-data:special` when its categories include special-category data |
 //! | `acc` | An agent-change-control manifest | `agent-authored` when the change's author is an agent; `acc:finding` when the change has an open finding; on every changed path |
+//! | `threat-model` | A Noru `threat-model` manifest (`.noru/threat-model.yml`) | `threat-model:expired` on changed paths whose map labels name a component (`component:<id>`) with a judgement past its expiry; `threat-model:unmodelled` on those naming a component the model does not judge |
 
-use crate::model::{Signal, SignalLabel};
+use crate::model::{Map, Signal, SignalLabel};
+use crate::pattern::Pattern;
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
@@ -26,7 +28,18 @@ pub const SPECIAL_CATEGORIES: &[&str] = &[
     "user.health_and_medical",
 ];
 
-pub const KINDS: &[&str] = &["sarif", "privacy-datamap", "acc"];
+pub const KINDS: &[&str] = &["sarif", "privacy-datamap", "acc", "threat-model"];
+
+/// What an adapter may need besides its file: the sensitivity map read from the base revision,
+/// and the head commit's committer date (UTC) for adapters that judge dates.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SignalContext<'a> {
+    pub map: Option<&'a Map>,
+    pub head_date: Option<&'a str>,
+}
+
+/// The map label that ties a path to a threat-model component.
+pub const COMPONENT_LABEL: &str = "component:";
 
 fn is_special(category: &str) -> bool {
     SPECIAL_CATEGORIES.iter().any(|s| {
@@ -96,12 +109,21 @@ pub fn read(
     bytes: &[u8],
     changed: &[String],
     head: &str,
+    context: SignalContext<'_>,
 ) -> Result<Signal> {
     let text = std::str::from_utf8(bytes).context("signal file is not UTF-8")?;
+    let mut as_of = None;
     let labels = match kind {
         "sarif" => sarif(text, changed)?,
         "privacy-datamap" => datamap(text, changed)?,
         "acc" => acc(text, changed, head)?,
+        "threat-model" => {
+            let date = context
+                .head_date
+                .context("the threat-model signal needs the head commit's date")?;
+            as_of = Some(date.to_string());
+            threat_model(text, changed, context.map, date)?
+        }
         other => bail!(
             "unknown signal kind {other:?}; expected one of {}",
             KINDS.join(", ")
@@ -111,6 +133,7 @@ pub fn read(
         kind: kind.into(),
         file: file.into(),
         digest: crate::canonical::sha256(bytes),
+        as_of,
         labels,
     })
 }
@@ -261,6 +284,71 @@ fn acc(text: &str, changed: &[String], head: &str) -> Result<Vec<SignalLabel>> {
     Ok(labels.finish())
 }
 
+/// A `YYYY-MM-DD` date, or None. A skeleton's `TODO-YYYY-MM-DD` is not one.
+fn date(value: &Value) -> Option<&str> {
+    value.as_str().filter(|s| {
+        s.len() == 10
+            && s.chars().enumerate().all(|(i, c)| {
+                if i == 4 || i == 7 {
+                    c == '-'
+                } else {
+                    c.is_ascii_digit()
+                }
+            })
+    })
+}
+
+/// A Noru `threat-model` manifest, judged as of `as_of`: for each component the map ties a changed
+/// path to (`component:<id>`), `threat-model:expired` when any judgement of a threat on it expired
+/// before `as_of`, and `threat-model:unmodelled` when the model judges no threat on it. A risk
+/// whose interpretation has no expiry date (an unsigned skeleton) is not a judgement.
+fn threat_model(
+    text: &str,
+    changed: &[String],
+    map: Option<&Map>,
+    as_of: &str,
+) -> Result<Vec<SignalLabel>> {
+    let doc = parse(text)?;
+    ensure!(
+        doc["piece"].as_str() == Some("threat-model"),
+        "not a threat-model manifest (piece is not threat-model)"
+    );
+    // Every element the model judges, and whether any of its judgements has expired.
+    let mut judged: BTreeMap<String, bool> = BTreeMap::new();
+    for risk in doc["risks"].as_array().into_iter().flatten() {
+        let Some(id) = risk["target"]["id"].as_str() else {
+            continue;
+        };
+        let Some(expires) = date(&risk["interpretation"]["expires_at"]) else {
+            continue;
+        };
+        let expired = judged.entry(id.to_string()).or_insert(false);
+        *expired |= expires < as_of;
+    }
+    let mut labels = Labels::new(changed);
+    for entry in map.map(|m| m.paths.as_slice()).unwrap_or_default() {
+        let components: Vec<&str> = entry
+            .labels
+            .iter()
+            .filter_map(|l| l.strip_prefix(COMPONENT_LABEL))
+            .collect();
+        if components.is_empty() {
+            continue;
+        }
+        let pattern = Pattern::new(&entry.pattern)?;
+        for path in changed.iter().filter(|p| pattern.matches(p)) {
+            for component in &components {
+                match judged.get(*component) {
+                    Some(true) => labels.add("threat-model:expired", path),
+                    Some(false) => {}
+                    None => labels.add("threat-model:unmodelled", path),
+                }
+            }
+        }
+    }
+    Ok(labels.finish())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -276,7 +364,15 @@ mod tests {
             {"locations":[{"physicalLocation":{"artifactLocation":{"uri":"src/other.rs"}}}]},
             {"level":"none","locations":[{"physicalLocation":{"artifactLocation":{"uri":"db/schema.sql"}}}]}
         ]}]}"#;
-        let s = read("sarif", "x.sarif", log.as_bytes(), &changed(), "h").unwrap();
+        let s = read(
+            "sarif",
+            "x.sarif",
+            log.as_bytes(),
+            &changed(),
+            "h",
+            SignalContext::default(),
+        )
+        .unwrap();
         assert_eq!(s.labels.len(), 1);
         assert_eq!(s.labels[0].label, "sarif:error");
         assert_eq!(s.labels[0].paths, vec!["src/auth.rs"]);
@@ -286,7 +382,15 @@ mod tests {
     #[test]
     fn a_data_map_labels_cited_files_and_special_categories() {
         let map = "piece: privacy-datamap\ndataset:\n  - collections:\n      - refs: [\"db/schema.sql:2\"]\n        fields:\n          - name: diagnosis\n            data_categories: [user.health_and_medical]\n";
-        let s = read("privacy-datamap", "m.yml", map.as_bytes(), &changed(), "h").unwrap();
+        let s = read(
+            "privacy-datamap",
+            "m.yml",
+            map.as_bytes(),
+            &changed(),
+            "h",
+            SignalContext::default(),
+        )
+        .unwrap();
         let names: Vec<&str> = s.labels.iter().map(|l| l.label.as_str()).collect();
         assert_eq!(names, ["personal-data", "personal-data:special"]);
         assert!(is_special("user.health_and_medical.genetic"));
@@ -297,18 +401,199 @@ mod tests {
     fn an_acc_manifest_labels_agent_authorship_and_open_findings() {
         let m = r#"{"events":{"changes":[{"id":"c1","head_sha":"ABC","author":{"actor_id":"agent:claude-code"}}]},
             "findings":[{"change_id":"c1","disposition":{"status":"open"}}]}"#;
-        let s = read("acc", "m.json", m.as_bytes(), &changed(), "abc").unwrap();
+        let s = read(
+            "acc",
+            "m.json",
+            m.as_bytes(),
+            &changed(),
+            "abc",
+            SignalContext::default(),
+        )
+        .unwrap();
         let names: Vec<&str> = s.labels.iter().map(|l| l.label.as_str()).collect();
         assert_eq!(names, ["acc:finding", "agent-authored"]);
         assert_eq!(s.labels[0].paths.len(), 2);
-        let none = read("acc", "m.json", m.as_bytes(), &changed(), "other").unwrap();
+        let none = read(
+            "acc",
+            "m.json",
+            m.as_bytes(),
+            &changed(),
+            "other",
+            SignalContext::default(),
+        )
+        .unwrap();
         assert!(none.labels.is_empty());
     }
 
     #[test]
     fn unknown_kinds_and_wrong_files_are_errors() {
-        assert!(read("lint", "x", b"{}", &changed(), "h").is_err());
-        assert!(read("sarif", "x", b"{\"version\":\"2.0.0\"}", &changed(), "h").is_err());
-        assert!(read("privacy-datamap", "x", b"piece: other", &changed(), "h").is_err());
+        assert!(
+            read(
+                "lint",
+                "x",
+                b"{}",
+                &changed(),
+                "h",
+                SignalContext::default()
+            )
+            .is_err()
+        );
+        assert!(
+            read(
+                "sarif",
+                "x",
+                b"{\"version\":\"2.0.0\"}",
+                &changed(),
+                "h",
+                SignalContext::default()
+            )
+            .is_err()
+        );
+        assert!(
+            read(
+                "privacy-datamap",
+                "x",
+                b"piece: other",
+                &changed(),
+                "h",
+                SignalContext::default()
+            )
+            .is_err()
+        );
+    }
+
+    fn component_map() -> Map {
+        serde_saphyr::from_str(
+            r#"
+version: "0.1"
+paths:
+  - pattern: /infra/assets/
+    labels: [infra, "component:assets-bucket"]
+  - pattern: /src/session/
+    labels: ["component:session"]
+  - pattern: /src/search/
+    labels: ["component:search"]
+  - pattern: /src/draft/
+    labels: ["component:draft"]
+"#,
+        )
+        .unwrap()
+    }
+
+    const THREAT_MODEL: &str = r#"
+piece: threat-model
+risks:
+  - target: {kind: component, id: assets-bucket}
+    interpretation: {expires_at: "2026-09-30"}
+  - target: {kind: component, id: session}
+    interpretation: {expires_at: "2026-12-31"}
+  - target: {kind: component, id: session}
+    interpretation: {expires_at: "2026-10-01"}
+  - target: {kind: component, id: draft}
+    interpretation: {expires_at: "TODO-YYYY-MM-DD"}
+"#;
+
+    fn threat_changed() -> Vec<String> {
+        vec![
+            "infra/assets/bucket.tf".into(),
+            "src/draft/new.rs".into(),
+            "src/search/index.rs".into(),
+            "src/session/store.rs".into(),
+            "src/unrelated.rs".into(),
+        ]
+    }
+
+    fn threat_signal(date: &str) -> Signal {
+        let map = component_map();
+        read(
+            "threat-model",
+            ".noru/threat-model.yml",
+            THREAT_MODEL.as_bytes(),
+            &threat_changed(),
+            "h",
+            SignalContext {
+                map: Some(&map),
+                head_date: Some(date),
+            },
+        )
+        .unwrap()
+    }
+
+    fn by_label(s: &Signal) -> BTreeMap<String, Vec<String>> {
+        s.labels
+            .iter()
+            .map(|l| (l.label.clone(), l.paths.clone()))
+            .collect()
+    }
+
+    #[test]
+    fn threat_model_labels_components_whose_judgement_expired_or_is_missing() {
+        let s = threat_signal("2026-10-16");
+        assert_eq!(s.as_of.as_deref(), Some("2026-10-16"));
+        let labels = by_label(&s);
+        // assets-bucket expired on 2026-09-30; one of session's two judgements expired on
+        // 2026-10-01, and one expired judgement is enough.
+        assert_eq!(
+            labels["threat-model:expired"],
+            ["infra/assets/bucket.tf", "src/session/store.rs"]
+        );
+        // search is in the map but not in the model; draft's only judgement is an unsigned
+        // skeleton, which is no judgement.
+        assert_eq!(
+            labels["threat-model:unmodelled"],
+            ["src/draft/new.rs", "src/search/index.rs"]
+        );
+    }
+
+    #[test]
+    fn threat_model_expiry_is_judged_as_of_the_head_date() {
+        // On the day a judgement expires it still stands; a day later it does not.
+        let early = threat_signal("2026-09-30");
+        assert!(!by_label(&early).contains_key("threat-model:expired"));
+        let late = threat_signal("2026-10-02");
+        assert_eq!(
+            by_label(&late)["threat-model:expired"],
+            ["infra/assets/bucket.tf", "src/session/store.rs"]
+        );
+    }
+
+    #[test]
+    fn threat_model_without_a_map_or_a_date() {
+        let s = read(
+            "threat-model",
+            "m.yml",
+            THREAT_MODEL.as_bytes(),
+            &threat_changed(),
+            "h",
+            SignalContext {
+                map: None,
+                head_date: Some("2026-10-16"),
+            },
+        )
+        .unwrap();
+        assert!(s.labels.is_empty(), "no map ties a path to a component");
+        let no_date = read(
+            "threat-model",
+            "m.yml",
+            THREAT_MODEL.as_bytes(),
+            &threat_changed(),
+            "h",
+            SignalContext::default(),
+        );
+        assert!(no_date.is_err());
+        assert!(
+            read(
+                "threat-model",
+                "x",
+                b"piece: privacy-datamap",
+                &threat_changed(),
+                "h",
+                SignalContext {
+                    map: None,
+                    head_date: Some("2026-10-16")
+                }
+            )
+            .is_err()
+        );
     }
 }

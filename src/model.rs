@@ -333,10 +333,14 @@ pub struct Team {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Signal {
-    /// `sarif`, `privacy-datamap` or `acc`.
+    /// `sarif`, `privacy-datamap`, `acc` or `threat-model`.
     pub kind: String,
     pub file: String,
     pub digest: String,
+    /// The date (`YYYY-MM-DD`, UTC) an adapter judged dated facts against: for `threat-model`, the
+    /// head commit's committer date. Absent for adapters that read no dates.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub as_of: Option<String>,
     pub labels: Vec<SignalLabel>,
 }
 

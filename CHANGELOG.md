@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- The `threat-model` signal (`--signal threat-model=.noru/threat-model.yml`): a Noru
+  `threat-model` manifest, judged as of the head commit's committer date. A changed path whose map
+  labels name a component (`component:<id>`) carries `threat-model:expired` when a judgement of a
+  threat on that component expired before that date, and `threat-model:unmodelled` when the model
+  judges no threat on it. The map, read from the base revision, is what ties paths to components.
+- A signal records the date it judged dated facts against, `as_of` (optional; the facts,
+  assessment and Statement schemas accept it). Specification §2.7, §2.7.2.
+- Conformance vector `accept/24-threat-model-signal`.
+
 ## [0.1.0] - 2026-10-16
 
 ### Added

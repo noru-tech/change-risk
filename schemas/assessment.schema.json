@@ -596,7 +596,8 @@
                 "enum": [
                   "sarif",
                   "privacy-datamap",
-                  "acc"
+                  "acc",
+                  "threat-model"
                 ]
               },
               "file": {
@@ -604,6 +605,10 @@
               },
               "digest": {
                 "$ref": "#/$defs/digest"
+              },
+              "as_of": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
               },
               "labels": {
                 "type": "array",
