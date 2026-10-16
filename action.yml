@@ -33,7 +33,7 @@ inputs:
     description: Token for the pull request, its label events and declarer teams (team members need read:org, or an App token with members read).
     default: ${{ github.token }}
   signals:
-    description: Signal files, one KIND=PATH per line (sarif, privacy-datamap, acc).
+    description: Signal files, one KIND=PATH per line (sarif, privacy-datamap, acc, threat-model).
     default: ""
   declarations:
     description: A declarations YAML file, instead of the pull request description.
