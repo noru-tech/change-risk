@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-16
+
 ### Added
 - The `threat-model` signal (`--signal threat-model=.noru/threat-model.yml`): a Noru
   `threat-model` manifest, judged as of the head commit's committer date. A changed path whose map
@@ -32,5 +34,6 @@ All notable changes to this project are documented here. The format is based on
     retroactive review is due.
   - A GitHub Action and a GitLab CI/CD component.
 
-[Unreleased]: https://github.com/noru-tech/change-risk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/noru-tech/change-risk/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/noru-tech/change-risk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/noru-tech/change-risk/releases/tag/v0.1.0

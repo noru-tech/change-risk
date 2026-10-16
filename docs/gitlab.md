@@ -5,7 +5,7 @@ request and reports the reasons as a Code Quality report.
 
 ```yaml
 include:
-  - remote: https://raw.githubusercontent.com/noru-tech/change-risk/v0.1.0/templates/change-risk.yml
+  - remote: https://raw.githubusercontent.com/noru-tech/change-risk/v0.2.0/templates/change-risk.yml
     inputs:
       fail_on: ""
       signals: "sarif=gl-sast-report.sarif"
@@ -19,7 +19,7 @@ must be in the clone.
 | Input | Default | |
 | --- | --- | --- |
 | `stage` | `test` | |
-| `version` | `0.1.0` | The crisk release to install |
+| `version` | `0.2.0` | The crisk release to install |
 | `image` | `alpine:3.20` | Needs `apk`, or `curl`, `git` and `xz` |
 | `signals` | | Space-separated `KIND=PATH` |
 | `fail_on` | | Fail at or above this tier |

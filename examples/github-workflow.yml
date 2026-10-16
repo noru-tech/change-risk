@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
       - id: risk
-        uses: noru-tech/change-risk@v0.1.0
+        uses: noru-tech/change-risk@v0.2.0
         with:
           sarif: change-risk.sarif
       - uses: github/codeql-action/upload-sarif@v4
