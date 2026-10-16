@@ -110,11 +110,14 @@ jobs:
           toolchain: stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - run: cargo build --locked
+      - name: The commit before this one, or this one on a root commit
+        id: base
+        run: echo "rev=$(git rev-parse --verify --quiet HEAD~1 || git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - id: risk
         uses: ./
         with:
           binary: target/debug/crisk
-          base: HEAD~1
+          base: ${{ steps.base.outputs.rev }}
           head: HEAD
           pr: ""
       - name: The action reported a tier
