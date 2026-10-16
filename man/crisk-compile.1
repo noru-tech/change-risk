@@ -1,0 +1,51 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH crisk-compile 1  "compile 0.1.0" 
+.SH NAME
+crisk\-compile \- Compile the tier policy into acc\*(Aqs tier section, a requirements document or prose
+.SH SYNOPSIS
+\fBcrisk compile\fR [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-\-policy\fR] [\fB\-\-map\fR] [\fB\-\-base\fR] [\fB\-\-checkout\fR] [\fB\-o\fR|\fB\-\-output\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fB\-\-to\fR> 
+.SH DESCRIPTION
+Compile the tier policy into acc\*(Aqs tier section, a requirements document or prose
+.SH OPTIONS
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress status lines on stderr
+.TP
+\fB\-\-to\fR \fI<TO>\fR
+What to produce
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+acc: agent\-change\-control\*(Aqs `tiers` and `missing_tier` policy section (YAML)
+.IP \(bu 2
+requirements: The tool\-neutral requirements document (JSON)
+.IP \(bu 2
+prose: The policy as Markdown, for people and auditors
+.RE
+.TP
+\fB\-\-policy\fR \fI<FILE>\fR
+The policy file; without it, the policy is read from \-\-base
+.TP
+\fB\-\-map\fR \fI<FILE>\fR
+The map file, with \-\-policy
+.TP
+\fB\-\-base\fR \fI<REV>\fR
+Read .change\-risk/ at this revision of \-\-checkout (default HEAD)
+.TP
+\fB\-\-checkout\fR \fI<DIR>\fR [default: .]
+
+.TP
+\fB\-o\fR, \fB\-\-output\fR \fI<FILE>\fR
+Write to FILE instead of stdout
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with \*(Aq\-h\*(Aq)
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.SH VERSION
+v0.1.0

@@ -1,0 +1,16 @@
+name: Feature request
+description: A new signal adapter, forge, output or policy field
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What decision can you not make, or not evidence, with crisk today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: For a signal adapter, the input format and the labels it would produce.

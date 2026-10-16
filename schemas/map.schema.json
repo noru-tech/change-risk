@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noru.tech/spec/ai-change-provenance/change-risk/v0.1/map.schema.json",
+  "title": "change-risk sensitivity map",
+  "description": "`.change-risk/map.yml`: CODEOWNERS-style path patterns and the sensitivity labels they carry. Read from the base revision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pattern",
+          "labels"
+        ],
+        "properties": {
+          "pattern": {
+            "$ref": "#/$defs/pattern"
+          },
+          "labels": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/label"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "label": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9:._-]*$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "level": {
+      "enum": [
+        "low",
+        "standard",
+        "high"
+      ]
+    },
+    "change_type": {
+      "enum": [
+        "standard",
+        "normal",
+        "emergency"
+      ]
+    },
+    "tier": {
+      "enum": [
+        "low",
+        "standard",
+        "high",
+        "emergency"
+      ]
+    },
+    "pattern": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^!\\s\\[\\]\\\\][^\\s\\[\\]\\\\]*$"
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_human_approvals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_review": {
+          "enum": [
+            "allowed",
+            "forbidden"
+          ]
+        },
+        "required_reviewer_teams": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "uniqueItems": true
+        },
+        "required_checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "retroactive_review_within_days": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

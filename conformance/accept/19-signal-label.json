@@ -1,0 +1,165 @@
+{
+  "description": "A SARIF error in a changed file carries `sarif:error`, which the policy makes high.",
+  "expected": {
+    "change_type": "normal",
+    "complete": true,
+    "emergency": null,
+    "facts_digest": "sha256:6943ff09031fd26f4379fb77a9101878b3c5b81a669bb14f623c05dd94183a0d",
+    "labels": [
+      {
+        "label": "sarif:error",
+        "paths": [
+          "src/util.rs"
+        ],
+        "sources": [
+          "signal:sarif"
+        ]
+      }
+    ],
+    "level": "high",
+    "reasons": [
+      {
+        "code": "CR008",
+        "level": "low"
+      },
+      {
+        "code": "CR001",
+        "label": "sarif:error",
+        "level": "high",
+        "paths": [
+          "src/util.rs"
+        ]
+      }
+    ],
+    "requirements": {
+      "min_human_approvals": 2,
+      "required_reviewer_teams": [
+        "acme/security"
+      ]
+    },
+    "tier": "high"
+  },
+  "facts": {
+    "change": {
+      "base": "1111111111111111111111111111111111111111",
+      "head": "3333333333333333333333333333333333333333",
+      "id": "github:acme/api:pr:7",
+      "merge_base": "2222222222222222222222222222222222222222",
+      "url": null
+    },
+    "generated": {
+      "tool": "conformance",
+      "version": "1"
+    },
+    "map": {
+      "paths": [
+        {
+          "labels": [
+            "auth"
+          ],
+          "pattern": "/src/auth/"
+        },
+        {
+          "labels": [
+            "payments",
+            "personal-data"
+          ],
+          "pattern": "/src/payments/"
+        },
+        {
+          "labels": [
+            "migrations"
+          ],
+          "pattern": "/db/"
+        },
+        {
+          "labels": [
+            "infra"
+          ],
+          "pattern": "*.tf"
+        }
+      ],
+      "version": "0.1"
+    },
+    "paths": [
+      "src/app.rs",
+      "src/util.rs"
+    ],
+    "policy": {
+      "default_level": "low",
+      "emergency": {
+        "declarers": [
+          "alice",
+          "team:acme/sre"
+        ],
+        "label": "emergency"
+      },
+      "levels": {
+        "auth": "high",
+        "infra": "standard",
+        "migrations": "standard",
+        "payments": "high",
+        "personal-data": "standard",
+        "sarif:error": "high"
+      },
+      "missing_tier": "standard",
+      "standard_changes": [
+        {
+          "name": "documentation",
+          "paths": [
+            "/docs/",
+            "*.md"
+          ]
+        }
+      ],
+      "tiers": {
+        "emergency": {
+          "min_human_approvals": 0,
+          "retroactive_review_within_days": 3
+        },
+        "high": {
+          "min_human_approvals": 2,
+          "required_reviewer_teams": [
+            "acme/security"
+          ]
+        },
+        "low": {
+          "agent_review": "allowed",
+          "min_human_approvals": 1
+        },
+        "standard": {
+          "min_human_approvals": 1
+        }
+      },
+      "version": "0.1"
+    },
+    "signals": [
+      {
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file": "results.sarif",
+        "kind": "sarif",
+        "labels": [
+          {
+            "label": "sarif:error",
+            "paths": [
+              "src/util.rs"
+            ]
+          }
+        ]
+      }
+    ],
+    "sources": {
+      "map": {
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": ".change-risk/map.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      },
+      "policy": {
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": ".change-risk/policy.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      }
+    },
+    "version": "0.1"
+  }
+}

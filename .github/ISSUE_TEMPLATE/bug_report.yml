@@ -1,0 +1,18 @@
+name: Bug report
+description: crisk computed the wrong tier, crashed, or misread a forge
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: crisk version
+      description: Output of `crisk --version`.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
+      description: For a wrong tier, attach the facts document (`crisk collect`), with anything private removed.
+    validations:
+      required: true

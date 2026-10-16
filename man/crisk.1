@@ -1,0 +1,62 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH crisk 1  "crisk 0.1.0" 
+.SH NAME
+crisk \- crisk — change risk tiers from declared facts
+.SH SYNOPSIS
+\fBcrisk\fR [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fIsubcommands\fR>
+.SH DESCRIPTION
+crisk — how risky is this change, and which controls must it meet?
+.PP
+Computes a tier (low, standard, high or emergency) for one change from the paths it touches, a
+sensitivity map and a tier policy read from the base revision, declarations that can only raise it,
+an emergency label applied by an allowed declarer, and labels from other tools\*(Aq findings. No
+content analysis and no LLM: the same facts always give the same tier and the same reasons.
+.PP
+Only `collect`, `assess` and `population` read `git` or a forge, and only `collect`, `assess` and
+`population` read the clock (to record when team membership was observed). `evaluate`, `render`,
+`validate` and `compile \-\-policy` touch neither.
+.PP
+Exit codes: 0 ok · 1 tier at or above \-\-fail\-on · 2 usage · 3 invalid input · 4 collection
+incomplete (beats 1) · 5 authentication rejected · 6 API, permission, rate\-limit or transport
+failure · 7 unsupported forge data.
+.SH OPTIONS
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress status lines on stderr
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with \*(Aq\-h\*(Aq)
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.SH SUBCOMMANDS
+.TP
+crisk\-collect(1)
+Collect the facts of one change: paths from git, map and policy from the base revision, declarations and label events from the forge, labels from signal files
+.TP
+crisk\-evaluate(1)
+Evaluate a facts document into an assessment, offline
+.TP
+crisk\-assess(1)
+Collect and evaluate one change
+.TP
+crisk\-render(1)
+Render an assessment (or a Statement) in another format, after validating it
+.TP
+crisk\-validate(1)
+Validate a facts document, assessment, Statement, map, policy, requirements document or emergency population
+.TP
+crisk\-compile(1)
+Compile the tier policy into acc\*(Aqs tier section, a requirements document or prose
+.TP
+crisk\-population(1)
+List the emergency population: merged changes carrying the emergency label in a window
+.TP
+crisk\-completions(1)
+Generate shell completions
+.TP
+crisk\-manpage(1)
+Generate man pages
+.SH VERSION
+v0.1.0

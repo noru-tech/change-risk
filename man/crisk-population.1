@@ -1,0 +1,61 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH crisk-population 1  "population 0.1.0" 
+.SH NAME
+crisk\-population \- List the emergency population: merged changes carrying the emergency label in a window
+.SH SYNOPSIS
+\fBcrisk population\fR [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-\-policy\fR] [\fB\-\-base\fR] [\fB\-\-checkout\fR] [\fB\-\-gitlab\-url\fR] [\fB\-\-max\-pages\fR] [\fB\-o\fR|\fB\-\-output\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fB\-\-since\fR> <\fB\-\-until\fR> <\fIFORGE\fR> <\fIREPOSITORY\fR> 
+.SH DESCRIPTION
+List the emergency population: merged changes carrying the emergency label in a window
+.SH OPTIONS
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress status lines on stderr
+.TP
+\fB\-\-since\fR \fI<DATE>\fR
+First day of the window, inclusive (YYYY\-MM\-DD, UTC)
+.TP
+\fB\-\-until\fR \fI<DATE>\fR
+Last day of the window, inclusive (YYYY\-MM\-DD, UTC)
+.TP
+\fB\-\-policy\fR \fI<FILE>\fR
+The policy file; without it, the policy is read from \-\-base of \-\-checkout
+.TP
+\fB\-\-base\fR \fI<REV>\fR
+
+.TP
+\fB\-\-checkout\fR \fI<DIR>\fR [default: .]
+
+.TP
+\fB\-\-gitlab\-url\fR \fI<URL>\fR [default: https://gitlab.com/api/v4]
+
+.TP
+\fB\-\-max\-pages\fR \fI<N>\fR [default: 100]
+
+.TP
+\fB\-o\fR, \fB\-\-output\fR \fI<FILE>\fR
+Write to FILE instead of stdout
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.TP
+<\fIFORGE\fR>
+`github` or `gitlab`
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+github
+.IP \(bu 2
+gitlab
+.RE
+.TP
+<\fIREPOSITORY\fR>
+OWNER/REPO on GitHub, GROUP/PROJECT on GitLab
+.SH VERSION
+v0.1.0

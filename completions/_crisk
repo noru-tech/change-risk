@@ -1,0 +1,411 @@
+#compdef crisk
+
+autoload -U is-at-least
+
+_crisk() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
+":: :_crisk_commands" \
+"*::: :->crisk" \
+&& ret=0
+    case $state in
+    (crisk)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:crisk-command-$line[1]:"
+        case $line[1] in
+            (collect)
+_arguments "${_arguments_options[@]}" : \
+'(--gitlab)--github=[Read the change from this GitHub repository (OWNER/REPO); requires --pr]:OWNER/REPO:_default' \
+'--pr=[The pull request number]:N:_default' \
+'--gitlab=[Read the change from this GitLab project (GROUP/PROJECT); requires --mr]:GROUP/PROJECT:_default' \
+'--mr=[The merge request IID]:N:_default' \
+'--gitlab-url=[The GitLab API base URL (https only)]:URL:_default' \
+'--max-pages=[Maximum pages per list endpoint (1..=1000)]:N:_default' \
+'--base=[The target branch commit the map and policy are read from (default\: the forge change'\''s base)]:REV:_default' \
+'--head=[The change'\''s head (default\: the forge change'\''s head, else HEAD)]:REV:_default' \
+'--checkout=[The local clone]:DIR:_files' \
+'--declarations=[Declarations from a YAML file instead of the change'\''s description]:FILE:_files' \
+'*--signal=[A signal file\: sarif=PATH, privacy-datamap=PATH or acc=PATH (repeatable)]:KIND=PATH:_default' \
+'-o+[Write the facts to FILE instead of stdout]:FILE:_files' \
+'--output=[Write the facts to FILE instead of stdout]:FILE:_files' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+&& ret=0
+;;
+(evaluate)
+_arguments "${_arguments_options[@]}" : \
+'-f+[Output format; inferred from the --output name when omitted, else \`table\`]:FORMAT:((json\:"The assessment, as RFC 8785 JSON"
+table\:"A summary for people"
+markdown\:"A summary in Markdown, for a job summary or a merge request note"
+in-toto\:"An unsigned in-toto Statement v1 whose subject is the head commit"
+sarif\:"SARIF 2.1.0, one result per reason that names paths"
+codequality\:"GitLab Code Quality, one issue per reason and path"))' \
+'--format=[Output format; inferred from the --output name when omitted, else \`table\`]:FORMAT:((json\:"The assessment, as RFC 8785 JSON"
+table\:"A summary for people"
+markdown\:"A summary in Markdown, for a job summary or a merge request note"
+in-toto\:"An unsigned in-toto Statement v1 whose subject is the head commit"
+sarif\:"SARIF 2.1.0, one result per reason that names paths"
+codequality\:"GitLab Code Quality, one issue per reason and path"))' \
+'-o+[Write to FILE instead of stdout]:FILE:_files' \
+'--output=[Write to FILE instead of stdout]:FILE:_files' \
+'--fail-on=[Exit 1 when the tier is at or above TIER (emergency is above high)]:TIER:(low standard high emergency)' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
+':facts -- A facts document written by `collect`:_files' \
+&& ret=0
+;;
+(assess)
+_arguments "${_arguments_options[@]}" : \
+'(--gitlab)--github=[Read the change from this GitHub repository (OWNER/REPO); requires --pr]:OWNER/REPO:_default' \
+'--pr=[The pull request number]:N:_default' \
+'--gitlab=[Read the change from this GitLab project (GROUP/PROJECT); requires --mr]:GROUP/PROJECT:_default' \
+'--mr=[The merge request IID]:N:_default' \
+'--gitlab-url=[The GitLab API base URL (https only)]:URL:_default' \
+'--max-pages=[Maximum pages per list endpoint (1..=1000)]:N:_default' \
+'--base=[The target branch commit the map and policy are read from (default\: the forge change'\''s base)]:REV:_default' \
+'--head=[The change'\''s head (default\: the forge change'\''s head, else HEAD)]:REV:_default' \
+'--checkout=[The local clone]:DIR:_files' \
+'--declarations=[Declarations from a YAML file instead of the change'\''s description]:FILE:_files' \
+'*--signal=[A signal file\: sarif=PATH, privacy-datamap=PATH or acc=PATH (repeatable)]:KIND=PATH:_default' \
+'-o+[Write the facts to FILE instead of stdout]:FILE:_files' \
+'--output=[Write the facts to FILE instead of stdout]:FILE:_files' \
+'-f+[Output format; inferred from the --output name when omitted, else \`table\`]:FORMAT:((json\:"The assessment, as RFC 8785 JSON"
+table\:"A summary for people"
+markdown\:"A summary in Markdown, for a job summary or a merge request note"
+in-toto\:"An unsigned in-toto Statement v1 whose subject is the head commit"
+sarif\:"SARIF 2.1.0, one result per reason that names paths"
+codequality\:"GitLab Code Quality, one issue per reason and path"))' \
+'--format=[Output format; inferred from the --output name when omitted, else \`table\`]:FORMAT:((json\:"The assessment, as RFC 8785 JSON"
+table\:"A summary for people"
+markdown\:"A summary in Markdown, for a job summary or a merge request note"
+in-toto\:"An unsigned in-toto Statement v1 whose subject is the head commit"
+sarif\:"SARIF 2.1.0, one result per reason that names paths"
+codequality\:"GitLab Code Quality, one issue per reason and path"))' \
+'--fail-on=[Exit 1 when the tier is at or above TIER (emergency is above high)]:TIER:(low standard high emergency)' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
+&& ret=0
+;;
+(render)
+_arguments "${_arguments_options[@]}" : \
+'-f+[Output format; inferred from the --output name when omitted, else \`table\`]:FORMAT:((json\:"The assessment, as RFC 8785 JSON"
+table\:"A summary for people"
+markdown\:"A summary in Markdown, for a job summary or a merge request note"
+in-toto\:"An unsigned in-toto Statement v1 whose subject is the head commit"
+sarif\:"SARIF 2.1.0, one result per reason that names paths"
+codequality\:"GitLab Code Quality, one issue per reason and path"))' \
+'--format=[Output format; inferred from the --output name when omitted, else \`table\`]:FORMAT:((json\:"The assessment, as RFC 8785 JSON"
+table\:"A summary for people"
+markdown\:"A summary in Markdown, for a job summary or a merge request note"
+in-toto\:"An unsigned in-toto Statement v1 whose subject is the head commit"
+sarif\:"SARIF 2.1.0, one result per reason that names paths"
+codequality\:"GitLab Code Quality, one issue per reason and path"))' \
+'-o+[Write to FILE instead of stdout]:FILE:_files' \
+'--output=[Write to FILE instead of stdout]:FILE:_files' \
+'--fail-on=[Exit 1 when the tier is at or above TIER (emergency is above high)]:TIER:(low standard high emergency)' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
+':input -- An assessment, or an in-toto Statement whose predicate is one:_files' \
+&& ret=0
+;;
+(validate)
+_arguments "${_arguments_options[@]}" : \
+'--kind=[Which document it is; detected when omitted]:KIND:(facts assessment statement map policy requirements population)' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+':input:_files' \
+&& ret=0
+;;
+(compile)
+_arguments "${_arguments_options[@]}" : \
+'--to=[What to produce]:TO:((acc\:"agent-change-control'\''s \`tiers\` and \`missing_tier\` policy section (YAML)"
+requirements\:"The tool-neutral requirements document (JSON)"
+prose\:"The policy as Markdown, for people and auditors"))' \
+'(--base)--policy=[The policy file; without it, the policy is read from --base]:FILE:_files' \
+'--map=[The map file, with --policy]:FILE:_files' \
+'--base=[Read .change-risk/ at this revision of --checkout (default HEAD)]:REV:_default' \
+'--checkout=[]:DIR:_files' \
+'-o+[Write to FILE instead of stdout]:FILE:_files' \
+'--output=[Write to FILE instead of stdout]:FILE:_files' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
+&& ret=0
+;;
+(population)
+_arguments "${_arguments_options[@]}" : \
+'--since=[First day of the window, inclusive (YYYY-MM-DD, UTC)]:DATE:_default' \
+'--until=[Last day of the window, inclusive (YYYY-MM-DD, UTC)]:DATE:_default' \
+'(--base)--policy=[The policy file; without it, the policy is read from --base of --checkout]:FILE:_files' \
+'--base=[]:REV:_default' \
+'--checkout=[]:DIR:_files' \
+'--gitlab-url=[]:URL:_default' \
+'--max-pages=[]:N:_default' \
+'-o+[Write to FILE instead of stdout]:FILE:_files' \
+'--output=[Write to FILE instead of stdout]:FILE:_files' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+':forge -- `github` or `gitlab`:(github gitlab)' \
+':repository -- OWNER/REPO on GitHub, GROUP/PROJECT on GitLab:_default' \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+':shell:(bash elvish fish powershell zsh)' \
+&& ret=0
+;;
+(manpage)
+_arguments "${_arguments_options[@]}" : \
+'--out-dir=[Write one page per command into DIR]:DIR:_files' \
+'-q[Suppress status lines on stderr]' \
+'--quiet[Suppress status lines on stderr]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_crisk__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:crisk-help-command-$line[1]:"
+        case $line[1] in
+            (collect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(evaluate)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(assess)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(render)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(validate)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(compile)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(population)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(manpage)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_crisk_commands] )) ||
+_crisk_commands() {
+    local commands; commands=(
+'collect:Collect the facts of one change\: paths from git, map and policy from the base revision, declarations and label events from the forge, labels from signal files' \
+'evaluate:Evaluate a facts document into an assessment, offline' \
+'assess:Collect and evaluate one change' \
+'render:Render an assessment (or a Statement) in another format, after validating it' \
+'validate:Validate a facts document, assessment, Statement, map, policy, requirements document or emergency population' \
+'compile:Compile the tier policy into acc'\''s tier section, a requirements document or prose' \
+'population:List the emergency population\: merged changes carrying the emergency label in a window' \
+'completions:Generate shell completions' \
+'manpage:Generate man pages' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'crisk commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__assess_commands] )) ||
+_crisk__subcmd__assess_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk assess commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__collect_commands] )) ||
+_crisk__subcmd__collect_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk collect commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__compile_commands] )) ||
+_crisk__subcmd__compile_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk compile commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__completions_commands] )) ||
+_crisk__subcmd__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk completions commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__evaluate_commands] )) ||
+_crisk__subcmd__evaluate_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk evaluate commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help_commands] )) ||
+_crisk__subcmd__help_commands() {
+    local commands; commands=(
+'collect:Collect the facts of one change\: paths from git, map and policy from the base revision, declarations and label events from the forge, labels from signal files' \
+'evaluate:Evaluate a facts document into an assessment, offline' \
+'assess:Collect and evaluate one change' \
+'render:Render an assessment (or a Statement) in another format, after validating it' \
+'validate:Validate a facts document, assessment, Statement, map, policy, requirements document or emergency population' \
+'compile:Compile the tier policy into acc'\''s tier section, a requirements document or prose' \
+'population:List the emergency population\: merged changes carrying the emergency label in a window' \
+'completions:Generate shell completions' \
+'manpage:Generate man pages' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'crisk help commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__assess_commands] )) ||
+_crisk__subcmd__help__subcmd__assess_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help assess commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__collect_commands] )) ||
+_crisk__subcmd__help__subcmd__collect_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help collect commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__compile_commands] )) ||
+_crisk__subcmd__help__subcmd__compile_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help compile commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__completions_commands] )) ||
+_crisk__subcmd__help__subcmd__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help completions commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__evaluate_commands] )) ||
+_crisk__subcmd__help__subcmd__evaluate_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help evaluate commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__help_commands] )) ||
+_crisk__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help help commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__manpage_commands] )) ||
+_crisk__subcmd__help__subcmd__manpage_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help manpage commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__population_commands] )) ||
+_crisk__subcmd__help__subcmd__population_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help population commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__render_commands] )) ||
+_crisk__subcmd__help__subcmd__render_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help render commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__help__subcmd__validate_commands] )) ||
+_crisk__subcmd__help__subcmd__validate_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk help validate commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__manpage_commands] )) ||
+_crisk__subcmd__manpage_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk manpage commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__population_commands] )) ||
+_crisk__subcmd__population_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk population commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__render_commands] )) ||
+_crisk__subcmd__render_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk render commands' commands "$@"
+}
+(( $+functions[_crisk__subcmd__validate_commands] )) ||
+_crisk__subcmd__validate_commands() {
+    local commands; commands=()
+    _describe -t commands 'crisk validate commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_crisk" ]; then
+    _crisk "$@"
+else
+    compdef _crisk crisk
+fi

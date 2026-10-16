@@ -1,0 +1,15 @@
+# .change-risk/map.yml: which paths carry which sensitivity labels.
+# Read from the target branch; a change to this file is itself assessed as high.
+version: "0.1"
+paths:
+  - pattern: /src/auth/
+    labels: [auth]
+  - pattern: /src/billing/
+    labels: [payments, personal-data]
+  - pattern: /db/migrations/
+    labels: [migrations]
+  - pattern: "*.tf"
+    labels: [infra]
+    note: Terraform anywhere in the repository
+  - pattern: /.github/workflows/
+    labels: [ci]

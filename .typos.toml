@@ -1,0 +1,8 @@
+[default.extend-words]
+# Reason code prefix.
+cr = "cr"
+# in-toto: the conventional `.intoto.json` attestation suffix.
+intoto = "intoto"
+
+[files]
+extend-exclude = ["target/**", "conformance/accept/**", "conformance/reject/**", "CHANGELOG.md", "Cargo.lock"]

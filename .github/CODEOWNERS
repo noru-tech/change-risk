@@ -1,0 +1,10 @@
+# Review ownership. The specification, schemas and evaluation carry compatibility commitments; the
+# action, the GitLab component and the workflows run with repository credentials.
+*                       @bipthelin
+/spec/                  @bipthelin
+/schemas/               @bipthelin
+/src/evaluate.rs        @bipthelin
+/conformance/           @bipthelin
+/action.yml             @bipthelin
+/templates/             @bipthelin
+/.github/               @bipthelin

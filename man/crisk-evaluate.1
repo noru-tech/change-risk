@@ -1,0 +1,65 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH crisk-evaluate 1  "evaluate 0.1.0" 
+.SH NAME
+crisk\-evaluate \- Evaluate a facts document into an assessment, offline
+.SH SYNOPSIS
+\fBcrisk evaluate\fR [\fB\-f\fR|\fB\-\-format\fR] [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-o\fR|\fB\-\-output\fR] [\fB\-\-fail\-on\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fIFACTS\fR> 
+.SH DESCRIPTION
+Evaluate a facts document into an assessment, offline
+.SH OPTIONS
+.TP
+\fB\-f\fR, \fB\-\-format\fR \fI<FORMAT>\fR
+Output format; inferred from the \-\-output name when omitted, else `table`
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+json: The assessment, as RFC 8785 JSON
+.IP \(bu 2
+table: A summary for people
+.IP \(bu 2
+markdown: A summary in Markdown, for a job summary or a merge request note
+.IP \(bu 2
+in\-toto: An unsigned in\-toto Statement v1 whose subject is the head commit
+.IP \(bu 2
+sarif: SARIF 2.1.0, one result per reason that names paths
+.IP \(bu 2
+codequality: GitLab Code Quality, one issue per reason and path
+.RE
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress status lines on stderr
+.TP
+\fB\-o\fR, \fB\-\-output\fR \fI<FILE>\fR
+Write to FILE instead of stdout
+.TP
+\fB\-\-fail\-on\fR \fI<TIER>\fR
+Exit 1 when the tier is at or above TIER (emergency is above high)
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+low
+.IP \(bu 2
+standard
+.IP \(bu 2
+high
+.IP \(bu 2
+emergency
+.RE
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with \*(Aq\-h\*(Aq)
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.TP
+<\fIFACTS\fR>
+A facts document written by `collect`
+.SH VERSION
+v0.1.0

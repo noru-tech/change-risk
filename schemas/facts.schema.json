@@ -1,0 +1,509 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noru.tech/spec/ai-change-provenance/change-risk/v0.1/facts.schema.json",
+  "title": "change-risk facts",
+  "description": "Everything collected about one change, and nothing derived from it: the input to evaluation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "generated",
+    "change",
+    "paths",
+    "map",
+    "policy",
+    "sources"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "generated": {
+      "$ref": "#/$defs/generated"
+    },
+    "change": {
+      "$ref": "#/$defs/change"
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "map": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/map"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "policy": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/policy"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map",
+        "policy"
+      ],
+      "properties": {
+        "map": {
+          "$ref": "#/$defs/source"
+        },
+        "policy": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    },
+    "declarations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "enum": [
+            "description",
+            "file"
+          ]
+        },
+        "change_type": {
+          "$ref": "#/$defs/change_type"
+        },
+        "risk": {
+          "$ref": "#/$defs/level"
+        },
+        "rollback": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "complete",
+        "events"
+      ],
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "action",
+              "actor",
+              "at"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "action": {
+                "enum": [
+                  "added",
+                  "removed"
+                ]
+              },
+              "actor": {
+                "type": "string",
+                "pattern": "^(github|gitlab):[^\\s]+$"
+              },
+              "at": {
+                "$ref": "#/$defs/time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "members",
+          "complete",
+          "observed_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(team|group):"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(github|gitlab):[^\\s]+$"
+            },
+            "uniqueItems": true
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "observed_at": {
+            "$ref": "#/$defs/time"
+          }
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "file",
+          "digest",
+          "labels"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "sarif",
+              "privacy-datamap",
+              "acc"
+            ]
+          },
+          "file": {
+            "type": "string"
+          },
+          "digest": {
+            "$ref": "#/$defs/digest"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "label",
+                "paths"
+              ],
+              "properties": {
+                "label": {
+                  "$ref": "#/$defs/label"
+                },
+                "paths": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "label": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9:._-]*$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "level": {
+      "enum": [
+        "low",
+        "standard",
+        "high"
+      ]
+    },
+    "change_type": {
+      "enum": [
+        "standard",
+        "normal",
+        "emergency"
+      ]
+    },
+    "tier": {
+      "enum": [
+        "low",
+        "standard",
+        "high",
+        "emergency"
+      ]
+    },
+    "pattern": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^!\\s\\[\\]\\\\][^\\s\\[\\]\\\\]*$"
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_human_approvals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_review": {
+          "enum": [
+            "allowed",
+            "forbidden"
+          ]
+        },
+        "required_reviewer_teams": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "uniqueItems": true
+        },
+        "required_checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "retroactive_review_within_days": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "generated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "version"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "url",
+        "base",
+        "merge_base",
+        "head"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(github:[^:\\s]+/[^:\\s]+:pr|gitlab:[^:\\s]+:mr):[1-9][0-9]*$"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base": {
+          "$ref": "#/$defs/sha"
+        },
+        "merge_base": {
+          "$ref": "#/$defs/sha"
+        },
+        "head": {
+          "$ref": "#/$defs/sha"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "revision",
+        "digest"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "digest": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "const": "0.1"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "pattern",
+              "labels"
+            ],
+            "properties": {
+              "pattern": {
+                "$ref": "#/$defs/pattern"
+              },
+              "labels": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/label"
+                }
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "const": "0.1"
+        },
+        "default_level": {
+          "$ref": "#/$defs/level"
+        },
+        "levels": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/label"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/level"
+          }
+        },
+        "standard_changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "paths"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "paths": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/pattern"
+                }
+              }
+            }
+          }
+        },
+        "emergency": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "declarers"
+          ],
+          "properties": {
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "declarers": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^(team:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+|group:[A-Za-z0-9_./-]+|[A-Za-z0-9_.-]+(\\[bot\\])?)$"
+              }
+            }
+          }
+        },
+        "tiers": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/tier"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/requirements"
+          }
+        },
+        "missing_tier": {
+          "$ref": "#/$defs/tier"
+        }
+      }
+    }
+  }
+}

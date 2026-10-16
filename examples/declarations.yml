@@ -1,0 +1,7 @@
+# Declarations from a file (crisk assess --declarations examples/declarations.yml), for when
+# the change has no forge description. They can only raise the requirements.
+change_type: normal
+risk: high
+rollback: >-
+  Revert the merge commit. The migration only adds a nullable column, so the previous release
+  runs against the new schema.

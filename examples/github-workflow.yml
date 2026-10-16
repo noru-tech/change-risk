@@ -1,0 +1,32 @@
+# Assess every pull request's risk tier. Copy to .github/workflows/change-risk.yml and pin the
+# actions to commit SHAs.
+name: change-risk
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  change-risk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: risk
+        uses: noru-tech/change-risk@v0.1.0
+        with:
+          sarif: change-risk.sarif
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: change-risk.sarif
+          category: change-risk

@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noru.tech/spec/ai-change-provenance/change-risk/v0.1/policy.schema.json",
+  "title": "change-risk tier policy",
+  "description": "`.change-risk/policy.yml`: the level each label sets, the standard-change catalogue, who may declare an emergency, and what each tier requires. Read from the base revision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "default_level": {
+      "$ref": "#/$defs/level"
+    },
+    "levels": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/label"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/level"
+      }
+    },
+    "standard_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "paths"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "paths": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/pattern"
+            }
+          }
+        }
+      }
+    },
+    "emergency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "declarers"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declarers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^(team:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+|group:[A-Za-z0-9_./-]+|[A-Za-z0-9_.-]+(\\[bot\\])?)$"
+          }
+        }
+      }
+    },
+    "tiers": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/tier"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/requirements"
+      }
+    },
+    "missing_tier": {
+      "$ref": "#/$defs/tier"
+    }
+  },
+  "$defs": {
+    "label": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9:._-]*$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "level": {
+      "enum": [
+        "low",
+        "standard",
+        "high"
+      ]
+    },
+    "change_type": {
+      "enum": [
+        "standard",
+        "normal",
+        "emergency"
+      ]
+    },
+    "tier": {
+      "enum": [
+        "low",
+        "standard",
+        "high",
+        "emergency"
+      ]
+    },
+    "pattern": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^!\\s\\[\\]\\\\][^\\s\\[\\]\\\\]*$"
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_human_approvals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_review": {
+          "enum": [
+            "allowed",
+            "forbidden"
+          ]
+        },
+        "required_reviewer_teams": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "uniqueItems": true
+        },
+        "required_checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "retroactive_review_within_days": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noru.tech/spec/ai-change-provenance/change-risk/v0.1/requirements.schema.json",
+  "title": "change-risk requirements document",
+  "description": "Per tier, what the policy requires and which paths route a change to that tier. Data for enforcement, not enforcement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "kind",
+    "policy_digest",
+    "tiers",
+    "emergency",
+    "missing_tier"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "kind": {
+      "const": "change-risk-requirements"
+    },
+    "policy_digest": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/digest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tiers": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/tier"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "requirements",
+          "protected_paths"
+        ],
+        "properties": {
+          "requirements": {
+            "$ref": "#/$defs/requirements"
+          },
+          "protected_paths": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "pattern",
+                "labels"
+              ],
+              "properties": {
+                "pattern": {
+                  "$ref": "#/$defs/pattern"
+                },
+                "labels": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/label"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "emergency": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "declarers",
+            "review_within_days"
+          ],
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "declarers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "review_within_days": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "missing_tier": {
+      "$ref": "#/$defs/tier"
+    }
+  },
+  "$defs": {
+    "label": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9:._-]*$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "level": {
+      "enum": [
+        "low",
+        "standard",
+        "high"
+      ]
+    },
+    "change_type": {
+      "enum": [
+        "standard",
+        "normal",
+        "emergency"
+      ]
+    },
+    "tier": {
+      "enum": [
+        "low",
+        "standard",
+        "high",
+        "emergency"
+      ]
+    },
+    "pattern": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^!\\s\\[\\]\\\\][^\\s\\[\\]\\\\]*$"
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_human_approvals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_review": {
+          "enum": [
+            "allowed",
+            "forbidden"
+          ]
+        },
+        "required_reviewer_teams": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "uniqueItems": true
+        },
+        "required_checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "retroactive_review_within_days": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

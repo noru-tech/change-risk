@@ -1,0 +1,146 @@
+{
+  "description": "The label events could not be read in full: incomplete.",
+  "expected": {
+    "change_type": "normal",
+    "complete": false,
+    "emergency": null,
+    "facts_digest": "sha256:fc74c1e383db7369a713a67e1646ece4ac6e54ce79377b6647f57117c64d28c1",
+    "labels": [],
+    "level": "low",
+    "reasons": [
+      {
+        "code": "CR008",
+        "level": "low"
+      },
+      {
+        "code": "CR010"
+      }
+    ],
+    "requirements": {
+      "agent_review": "allowed",
+      "min_human_approvals": 1
+    },
+    "tier": "low"
+  },
+  "facts": {
+    "change": {
+      "base": "1111111111111111111111111111111111111111",
+      "head": "3333333333333333333333333333333333333333",
+      "id": "github:acme/api:pr:7",
+      "merge_base": "2222222222222222222222222222222222222222",
+      "url": null
+    },
+    "generated": {
+      "tool": "conformance",
+      "version": "1"
+    },
+    "labels": {
+      "complete": false,
+      "events": []
+    },
+    "map": {
+      "paths": [
+        {
+          "labels": [
+            "auth"
+          ],
+          "pattern": "/src/auth/"
+        },
+        {
+          "labels": [
+            "payments",
+            "personal-data"
+          ],
+          "pattern": "/src/payments/"
+        },
+        {
+          "labels": [
+            "migrations"
+          ],
+          "pattern": "/db/"
+        },
+        {
+          "labels": [
+            "infra"
+          ],
+          "pattern": "*.tf"
+        }
+      ],
+      "version": "0.1"
+    },
+    "paths": [
+      "src/app.rs"
+    ],
+    "policy": {
+      "default_level": "low",
+      "emergency": {
+        "declarers": [
+          "alice",
+          "team:acme/sre"
+        ],
+        "label": "emergency"
+      },
+      "levels": {
+        "auth": "high",
+        "infra": "standard",
+        "migrations": "standard",
+        "payments": "high",
+        "personal-data": "standard",
+        "sarif:error": "high"
+      },
+      "missing_tier": "standard",
+      "standard_changes": [
+        {
+          "name": "documentation",
+          "paths": [
+            "/docs/",
+            "*.md"
+          ]
+        }
+      ],
+      "tiers": {
+        "emergency": {
+          "min_human_approvals": 0,
+          "retroactive_review_within_days": 3
+        },
+        "high": {
+          "min_human_approvals": 2,
+          "required_reviewer_teams": [
+            "acme/security"
+          ]
+        },
+        "low": {
+          "agent_review": "allowed",
+          "min_human_approvals": 1
+        },
+        "standard": {
+          "min_human_approvals": 1
+        }
+      },
+      "version": "0.1"
+    },
+    "sources": {
+      "map": {
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": ".change-risk/map.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      },
+      "policy": {
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": ".change-risk/policy.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      }
+    },
+    "teams": [
+      {
+        "complete": true,
+        "id": "team:acme/sre",
+        "members": [
+          "github:sam"
+        ],
+        "observed_at": "2026-10-01T00:00:00Z"
+      }
+    ],
+    "version": "0.1"
+  }
+}

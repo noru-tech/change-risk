@@ -1,0 +1,80 @@
+# GitLab CI/CD component: assess every merge request's risk tier.
+#
+#   include:
+#     - remote: https://raw.githubusercontent.com/noru-tech/change-risk/v0.1.0/templates/change-risk.yml
+#       inputs:
+#         fail_on: emergency
+#
+# It needs a masked CI/CD variable GITLAB_TOKEN holding a project access token with `read_api`
+# (the merge request, its label events and declarer group membership). CI_JOB_TOKEN cannot read
+# merge request label events. See docs/gitlab.md.
+spec:
+  inputs:
+    stage:
+      default: test
+      description: The stage the job runs in.
+    version:
+      default: "0.1.0"
+      description: The crisk release to install (without the leading v).
+    image:
+      default: alpine:3.20
+      description: The job image; it needs sh and apk, or curl, git and xz already installed.
+    signals:
+      default: ""
+      description: Signal files, space-separated KIND=PATH (sarif, privacy-datamap, acc).
+    fail_on:
+      default: ""
+      description: Fail when the tier is at or above this one (low, standard, high, emergency).
+    max_pages:
+      default: "100"
+      description: Maximum pages per forge list endpoint.
+---
+change-risk:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    # The diff starts at the merge base, and the map and policy are read from the target branch:
+    # both must be in the clone.
+    GIT_DEPTH: "0"
+    CRISK_VERSION: $[[ inputs.version ]]
+    CRISK_SIGNALS: $[[ inputs.signals ]]
+    CRISK_FAIL_ON: $[[ inputs.fail_on ]]
+    CRISK_MAX_PAGES: $[[ inputs.max_pages ]]
+  before_script:
+    - if command -v apk >/dev/null; then apk add --no-cache curl git xz >/dev/null; fi
+    - |
+      set -eu
+      case "$(uname -m)" in
+        x86_64) target=x86_64-unknown-linux-musl ;;
+        aarch64) target=aarch64-unknown-linux-musl ;;
+        *) echo "unsupported architecture $(uname -m)" >&2; exit 1 ;;
+      esac
+      archive="change-risk-${target}.tar.xz"
+      base="https://github.com/noru-tech/change-risk/releases/download/v${CRISK_VERSION}"
+      curl --proto '=https' --tlsv1.2 -sSfL --retry 3 -o "$archive" "${base}/${archive}"
+      curl --proto '=https' --tlsv1.2 -sSfL --retry 3 -o "${archive}.sha256" "${base}/${archive}.sha256"
+      sha256sum -c "${archive}.sha256"
+      tar -xJf "$archive"
+      mv "change-risk-${target}/crisk" /usr/local/bin/crisk
+      crisk --version
+  script:
+    - |
+      set +e
+      set -- -q assess --gitlab "$CI_PROJECT_PATH" --mr "$CI_MERGE_REQUEST_IID" --gitlab-url "$CI_API_V4_URL" --max-pages "$CRISK_MAX_PAGES" --format json --output change-risk.json
+      if [ -n "$CRISK_FAIL_ON" ]; then set -- "$@" --fail-on "$CRISK_FAIL_ON"; fi
+      for signal in $CRISK_SIGNALS; do set -- "$@" --signal "$signal"; done
+      crisk "$@"
+      code=$?
+      if [ -s change-risk.json ]; then
+        crisk -q render change-risk.json --format codequality --output gl-code-quality-report.json
+        crisk -q render change-risk.json --format table
+      fi
+      exit "$code"
+  artifacts:
+    when: always
+    paths:
+      - change-risk.json
+    reports:
+      codequality: gl-code-quality-report.json

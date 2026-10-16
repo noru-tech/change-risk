@@ -1,0 +1,47 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH crisk-validate 1  "validate 0.1.0" 
+.SH NAME
+crisk\-validate \- Validate a facts document, assessment, Statement, map, policy, requirements document or emergency population
+.SH SYNOPSIS
+\fBcrisk validate\fR [\fB\-\-kind\fR] [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fIINPUT\fR> 
+.SH DESCRIPTION
+Validate a facts document, assessment, Statement, map, policy, requirements document or emergency population
+.SH OPTIONS
+.TP
+\fB\-\-kind\fR \fI<KIND>\fR
+Which document it is; detected when omitted
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+facts
+.IP \(bu 2
+assessment
+.IP \(bu 2
+statement
+.IP \(bu 2
+map
+.IP \(bu 2
+policy
+.IP \(bu 2
+requirements
+.IP \(bu 2
+population
+.RE
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress status lines on stderr
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.TP
+<\fIINPUT\fR>
+
+.SH VERSION
+v0.1.0

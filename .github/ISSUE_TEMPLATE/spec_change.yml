@@ -1,0 +1,17 @@
+name: Specification change
+description: A change to how a tier is derived, or to a schema
+labels: [spec]
+body:
+  - type: textarea
+    id: section
+    attributes:
+      label: Section and current text
+      description: Which section of spec/change-risk.md, and what it says now.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed change, and the conformance vectors it needs
+    validations:
+      required: true

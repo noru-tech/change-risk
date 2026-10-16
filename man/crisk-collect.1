@@ -1,0 +1,57 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH crisk-collect 1  "collect 0.1.0" 
+.SH NAME
+crisk\-collect \- Collect the facts of one change: paths from git, map and policy from the base revision, declarations and label events from the forge, labels from signal files
+.SH SYNOPSIS
+\fBcrisk collect\fR [\fB\-\-github\fR] [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-\-pr\fR] [\fB\-\-gitlab\fR] [\fB\-\-mr\fR] [\fB\-\-gitlab\-url\fR] [\fB\-\-max\-pages\fR] [\fB\-\-base\fR] [\fB\-\-head\fR] [\fB\-\-checkout\fR] [\fB\-\-declarations\fR] [\fB\-\-signal\fR] [\fB\-o\fR|\fB\-\-output\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] 
+.SH DESCRIPTION
+Collect the facts of one change: paths from git, map and policy from the base revision, declarations and label events from the forge, labels from signal files
+.SH OPTIONS
+.TP
+\fB\-\-github\fR \fI<OWNER/REPO>\fR
+Read the change from this GitHub repository (OWNER/REPO); requires \-\-pr
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress status lines on stderr
+.TP
+\fB\-\-pr\fR \fI<N>\fR
+The pull request number
+.TP
+\fB\-\-gitlab\fR \fI<GROUP/PROJECT>\fR
+Read the change from this GitLab project (GROUP/PROJECT); requires \-\-mr
+.TP
+\fB\-\-mr\fR \fI<N>\fR
+The merge request IID
+.TP
+\fB\-\-gitlab\-url\fR \fI<URL>\fR [default: https://gitlab.com/api/v4]
+The GitLab API base URL (https only)
+.TP
+\fB\-\-max\-pages\fR \fI<N>\fR [default: 100]
+Maximum pages per list endpoint (1..=1000)
+.TP
+\fB\-\-base\fR \fI<REV>\fR
+The target branch commit the map and policy are read from (default: the forge change\*(Aqs base)
+.TP
+\fB\-\-head\fR \fI<REV>\fR
+The change\*(Aqs head (default: the forge change\*(Aqs head, else HEAD)
+.TP
+\fB\-\-checkout\fR \fI<DIR>\fR [default: .]
+The local clone
+.TP
+\fB\-\-declarations\fR \fI<FILE>\fR
+Declarations from a YAML file instead of the change\*(Aqs description
+.TP
+\fB\-\-signal\fR \fI<KIND=PATH>\fR
+A signal file: sarif=PATH, privacy\-datamap=PATH or acc=PATH (repeatable)
+.TP
+\fB\-o\fR, \fB\-\-output\fR \fI<FILE>\fR
+Write the facts to FILE instead of stdout
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.SH VERSION
+v0.1.0

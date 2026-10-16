@@ -1,0 +1,112 @@
+{
+  "description": "Paths must be sorted and unique.",
+  "facts": {
+    "version": "0.1",
+    "generated": {
+      "tool": "conformance",
+      "version": "1"
+    },
+    "change": {
+      "id": "github:acme/api:pr:7",
+      "url": null,
+      "base": "1111111111111111111111111111111111111111",
+      "merge_base": "2222222222222222222222222222222222222222",
+      "head": "3333333333333333333333333333333333333333"
+    },
+    "paths": [
+      "b.rs",
+      "a.rs"
+    ],
+    "map": {
+      "version": "0.1",
+      "paths": [
+        {
+          "pattern": "/src/auth/",
+          "labels": [
+            "auth"
+          ]
+        },
+        {
+          "pattern": "/src/payments/",
+          "labels": [
+            "payments",
+            "personal-data"
+          ]
+        },
+        {
+          "pattern": "/db/",
+          "labels": [
+            "migrations"
+          ]
+        },
+        {
+          "pattern": "*.tf",
+          "labels": [
+            "infra"
+          ]
+        }
+      ]
+    },
+    "policy": {
+      "version": "0.1",
+      "default_level": "low",
+      "levels": {
+        "auth": "high",
+        "payments": "high",
+        "personal-data": "standard",
+        "migrations": "standard",
+        "infra": "standard",
+        "sarif:error": "high"
+      },
+      "standard_changes": [
+        {
+          "name": "documentation",
+          "paths": [
+            "/docs/",
+            "*.md"
+          ]
+        }
+      ],
+      "emergency": {
+        "label": "emergency",
+        "declarers": [
+          "alice",
+          "team:acme/sre"
+        ]
+      },
+      "tiers": {
+        "low": {
+          "min_human_approvals": 1,
+          "agent_review": "allowed"
+        },
+        "standard": {
+          "min_human_approvals": 1
+        },
+        "high": {
+          "min_human_approvals": 2,
+          "required_reviewer_teams": [
+            "acme/security"
+          ]
+        },
+        "emergency": {
+          "min_human_approvals": 0,
+          "retroactive_review_within_days": 3
+        }
+      },
+      "missing_tier": "standard"
+    },
+    "sources": {
+      "map": {
+        "path": ".change-risk/map.yml",
+        "revision": "1111111111111111111111111111111111111111",
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "policy": {
+        "path": ".change-risk/policy.yml",
+        "revision": "1111111111111111111111111111111111111111",
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  },
+  "error": "sorted"
+}

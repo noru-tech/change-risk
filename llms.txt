@@ -1,0 +1,23 @@
+# change-risk
+
+> Deterministic change risk tiers (low, standard, high, emergency) for a source change, from the
+> paths it touches, a sensitivity map and tier policy read from the target branch, declarations
+> that can only raise it, an emergency label applied by an allowed declarer, and other tools'
+> findings. Outputs an in-toto predicate that agent-change-control consumes. Rust CLI `crisk`.
+
+Rules: no content analysis, no model; the map and policy are read from the base revision; a change
+to `.change-risk/` is always high; declarations only raise; an emergency needs a forge label event by
+an allowed declarer. Reason codes CR001 to CR012; exit codes 0 to 7 (1 tier at or above --fail-on,
+4 incomplete).
+
+## Docs
+
+- [README](https://raw.githubusercontent.com/noru-tech/change-risk/main/README.md)
+- [Specification](https://raw.githubusercontent.com/noru-tech/change-risk/main/spec/change-risk.md)
+- [Map and policy](https://raw.githubusercontent.com/noru-tech/change-risk/main/docs/map-and-policy.md)
+- [Reason codes](https://raw.githubusercontent.com/noru-tech/change-risk/main/docs/reasons.md)
+- [Exit codes](https://raw.githubusercontent.com/noru-tech/change-risk/main/docs/exit-codes.md)
+- [Signals](https://raw.githubusercontent.com/noru-tech/change-risk/main/docs/signals.md)
+- [Forges and tokens](https://raw.githubusercontent.com/noru-tech/change-risk/main/docs/forges.md)
+- [Emergency changes](https://raw.githubusercontent.com/noru-tech/change-risk/main/docs/emergency.md)
+- [Outputs](https://raw.githubusercontent.com/noru-tech/change-risk/main/docs/outputs.md)

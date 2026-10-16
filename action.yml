@@ -1,0 +1,165 @@
+name: change-risk
+description: >-
+  Compute a pull request's risk tier from the paths it touches, a sensitivity map and a tier policy
+  read from the base branch, and an emergency label applied by an allowed declarer.
+author: Noru
+branding:
+  icon: shield
+  color: orange
+
+inputs:
+  version:
+    description: The crisk release to install (without the leading v).
+    default: "0.1.0"
+  binary:
+    description: A crisk binary already on the runner; skips the install (for testing).
+    default: ""
+  verify-attestation:
+    description: Verify the release archive's GitHub artifact attestation with the gh CLI before running it.
+    default: "true"
+  pr:
+    description: The pull request number. Empty reads no forge, so no description declarations and no emergency label.
+    default: ${{ github.event.pull_request.number }}
+  repository:
+    description: OWNER/REPO.
+    default: ${{ github.repository }}
+  base:
+    description: The target branch commit the map and policy are read from (default the pull request's base).
+    default: ""
+  head:
+    description: The change's head (default the pull request's head).
+    default: ""
+  token:
+    description: Token for the pull request, its label events and declarer teams (team members need read:org, or an App token with members read).
+    default: ${{ github.token }}
+  signals:
+    description: Signal files, one KIND=PATH per line (sarif, privacy-datamap, acc).
+    default: ""
+  declarations:
+    description: A declarations YAML file, instead of the pull request description.
+    default: ""
+  fail-on:
+    description: Fail when the tier is at or above this one (low, standard, high, emergency). Empty never fails on the tier.
+    default: ""
+  output:
+    description: Where to write the assessment (JSON).
+    default: change-risk.json
+  sarif:
+    description: Also write SARIF here (for upload to code scanning). Empty writes none.
+    default: ""
+  summary:
+    description: Append the assessment to the job summary.
+    default: "true"
+  max-pages:
+    description: Maximum pages per forge list endpoint.
+    default: "100"
+
+outputs:
+  tier:
+    description: low, standard, high or emergency.
+    value: ${{ steps.assess.outputs.tier }}
+  level:
+    description: low, standard or high.
+    value: ${{ steps.assess.outputs.level }}
+  change-type:
+    description: standard, normal or emergency.
+    value: ${{ steps.assess.outputs.change-type }}
+  complete:
+    description: false when an emergency could not be established.
+    value: ${{ steps.assess.outputs.complete }}
+  exit-code:
+    description: crisk's exit code (0 ok, 1 at or above fail-on, 4 incomplete, others are errors).
+    value: ${{ steps.assess.outputs.exit-code }}
+  assessment:
+    description: The path of the assessment.
+    value: ${{ inputs.output }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install crisk
+      id: install
+      shell: bash
+      env:
+        CRISK_VERSION: ${{ inputs.version }}
+        CRISK_BINARY: ${{ inputs.binary }}
+        CRISK_VERIFY: ${{ inputs.verify-attestation }}
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        if [ -n "$CRISK_BINARY" ]; then
+          echo "bin=$(cd "$(dirname "$CRISK_BINARY")" && pwd)/$(basename "$CRISK_BINARY")" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        case "$(uname -s)-$(uname -m)" in
+          Linux-x86_64)  target=x86_64-unknown-linux-musl ;;
+          Linux-aarch64) target=aarch64-unknown-linux-musl ;;
+          Darwin-x86_64) target=x86_64-apple-darwin ;;
+          Darwin-arm64)  target=aarch64-apple-darwin ;;
+          *) echo "::error::unsupported runner platform $(uname -s)-$(uname -m)" >&2; exit 1 ;;
+        esac
+        archive="change-risk-${target}.tar.xz"
+        base="https://github.com/noru-tech/change-risk/releases/download/v${CRISK_VERSION}"
+        dir="${RUNNER_TEMP}/crisk-${CRISK_VERSION}"
+        mkdir -p "$dir"
+        cd "$dir"
+        curl --proto '=https' --tlsv1.2 -sSfL --retry 3 -o "$archive" "${base}/${archive}"
+        curl --proto '=https' --tlsv1.2 -sSfL --retry 3 -o "${archive}.sha256" "${base}/${archive}.sha256"
+        if command -v sha256sum >/dev/null; then sha256sum -c "${archive}.sha256"; else shasum -a 256 -c "${archive}.sha256"; fi
+        if [ "$CRISK_VERIFY" = "true" ]; then
+          if ! command -v gh >/dev/null; then
+            echo "::error::verify-attestation is true but the gh CLI is not installed; install it or set verify-attestation: false" >&2
+            exit 1
+          fi
+          gh attestation verify "$archive" --repo noru-tech/change-risk
+        fi
+        tar -xJf "$archive"
+        echo "bin=${dir}/change-risk-${target}/crisk" >> "$GITHUB_OUTPUT"
+        "${dir}/change-risk-${target}/crisk" --version
+
+    - name: Assess the change
+      id: assess
+      shell: bash
+      env:
+        CRISK: ${{ steps.install.outputs.bin }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+        CRISK_PR: ${{ inputs.pr }}
+        CRISK_REPOSITORY: ${{ inputs.repository }}
+        CRISK_BASE: ${{ inputs.base }}
+        CRISK_HEAD: ${{ inputs.head }}
+        CRISK_SIGNALS: ${{ inputs.signals }}
+        CRISK_DECLARATIONS: ${{ inputs.declarations }}
+        CRISK_FAIL_ON: ${{ inputs.fail-on }}
+        CRISK_OUTPUT: ${{ inputs.output }}
+        CRISK_SARIF: ${{ inputs.sarif }}
+        CRISK_SUMMARY: ${{ inputs.summary }}
+        CRISK_MAX_PAGES: ${{ inputs.max-pages }}
+      run: |
+        # crisk's exit code is the verdict, so it is captured rather than fatal.
+        set +e -uo pipefail
+        args=(-q assess --max-pages "$CRISK_MAX_PAGES" --format json --output "$CRISK_OUTPUT")
+        if [ -n "$CRISK_PR" ]; then args+=(--github "$CRISK_REPOSITORY" --pr "$CRISK_PR"); fi
+        if [ -n "$CRISK_BASE" ]; then args+=(--base "$CRISK_BASE"); fi
+        if [ -n "$CRISK_HEAD" ]; then args+=(--head "$CRISK_HEAD"); fi
+        if [ -n "$CRISK_DECLARATIONS" ]; then args+=(--declarations "$CRISK_DECLARATIONS"); fi
+        if [ -n "$CRISK_FAIL_ON" ]; then args+=(--fail-on "$CRISK_FAIL_ON"); fi
+        while IFS= read -r signal; do
+          signal="${signal//[$'\r']}"
+          if [ -n "$signal" ]; then args+=(--signal "$signal"); fi
+        done <<< "$CRISK_SIGNALS"
+        "$CRISK" "${args[@]}"
+        code=$?
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        if [ -s "$CRISK_OUTPUT" ]; then
+          for field in tier level change_type complete; do
+            value=$(jq -r ".$field" "$CRISK_OUTPUT")
+            echo "${field//_/-}=$value" >> "$GITHUB_OUTPUT"
+          done
+          if [ "$CRISK_SUMMARY" = "true" ]; then
+            "$CRISK" -q render "$CRISK_OUTPUT" --format markdown >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -n "$CRISK_SARIF" ]; then
+            "$CRISK" -q render "$CRISK_OUTPUT" --format sarif --output "$CRISK_SARIF"
+          fi
+        fi
+        exit "$code"

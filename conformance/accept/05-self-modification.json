@@ -1,0 +1,138 @@
+{
+  "description": "Editing .change-risk/ is always high, whatever the policy says.",
+  "expected": {
+    "change_type": "normal",
+    "complete": true,
+    "emergency": null,
+    "facts_digest": "sha256:528428aa2d76a125ceb7d97dc68982a4179f1ed9d847559c015bf09862f1e6b4",
+    "labels": [],
+    "level": "high",
+    "reasons": [
+      {
+        "code": "CR008",
+        "level": "low"
+      },
+      {
+        "code": "CR002",
+        "level": "high",
+        "paths": [
+          ".change-risk/policy.yml"
+        ]
+      }
+    ],
+    "requirements": {
+      "min_human_approvals": 2,
+      "required_reviewer_teams": [
+        "acme/security"
+      ]
+    },
+    "tier": "high"
+  },
+  "facts": {
+    "change": {
+      "base": "1111111111111111111111111111111111111111",
+      "head": "3333333333333333333333333333333333333333",
+      "id": "github:acme/api:pr:7",
+      "merge_base": "2222222222222222222222222222222222222222",
+      "url": null
+    },
+    "generated": {
+      "tool": "conformance",
+      "version": "1"
+    },
+    "map": {
+      "paths": [
+        {
+          "labels": [
+            "auth"
+          ],
+          "pattern": "/src/auth/"
+        },
+        {
+          "labels": [
+            "payments",
+            "personal-data"
+          ],
+          "pattern": "/src/payments/"
+        },
+        {
+          "labels": [
+            "migrations"
+          ],
+          "pattern": "/db/"
+        },
+        {
+          "labels": [
+            "infra"
+          ],
+          "pattern": "*.tf"
+        }
+      ],
+      "version": "0.1"
+    },
+    "paths": [
+      ".change-risk/policy.yml"
+    ],
+    "policy": {
+      "default_level": "low",
+      "emergency": {
+        "declarers": [
+          "alice",
+          "team:acme/sre"
+        ],
+        "label": "emergency"
+      },
+      "levels": {
+        "auth": "high",
+        "infra": "standard",
+        "migrations": "standard",
+        "payments": "high",
+        "personal-data": "standard",
+        "sarif:error": "high"
+      },
+      "missing_tier": "standard",
+      "standard_changes": [
+        {
+          "name": "documentation",
+          "paths": [
+            "/docs/",
+            "*.md"
+          ]
+        }
+      ],
+      "tiers": {
+        "emergency": {
+          "min_human_approvals": 0,
+          "retroactive_review_within_days": 3
+        },
+        "high": {
+          "min_human_approvals": 2,
+          "required_reviewer_teams": [
+            "acme/security"
+          ]
+        },
+        "low": {
+          "agent_review": "allowed",
+          "min_human_approvals": 1
+        },
+        "standard": {
+          "min_human_approvals": 1
+        }
+      },
+      "version": "0.1"
+    },
+    "sources": {
+      "map": {
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": ".change-risk/map.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      },
+      "policy": {
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": ".change-risk/policy.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      }
+    },
+    "version": "0.1"
+  }
+}

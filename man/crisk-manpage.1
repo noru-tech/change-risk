@@ -1,0 +1,24 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH crisk-manpage 1  "manpage 0.1.0" 
+.SH NAME
+crisk\-manpage \- Generate man pages
+.SH SYNOPSIS
+\fBcrisk manpage\fR [\fB\-q\fR|\fB\-\-quiet\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fB\-\-out\-dir\fR> 
+.SH DESCRIPTION
+Generate man pages
+.SH OPTIONS
+.TP
+\fB\-\-out\-dir\fR \fI<DIR>\fR
+Write one page per command into DIR
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress status lines on stderr
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.SH VERSION
+v0.1.0

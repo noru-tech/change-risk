@@ -1,0 +1,56 @@
+{
+  "description": "No map or policy at the base revision: the built-in policy, level standard.",
+  "expected": {
+    "change_type": "normal",
+    "complete": true,
+    "emergency": null,
+    "facts_digest": "sha256:c8ab654d87e231c70e91a6423a8eaaefebd6f6cf042e77b56031a15b9bf71639",
+    "labels": [],
+    "level": "standard",
+    "reasons": [
+      {
+        "code": "CR009"
+      },
+      {
+        "code": "CR009"
+      },
+      {
+        "code": "CR008",
+        "level": "standard"
+      }
+    ],
+    "requirements": null,
+    "tier": "standard"
+  },
+  "facts": {
+    "change": {
+      "base": "1111111111111111111111111111111111111111",
+      "head": "3333333333333333333333333333333333333333",
+      "id": "github:acme/api:pr:7",
+      "merge_base": "2222222222222222222222222222222222222222",
+      "url": null
+    },
+    "generated": {
+      "tool": "conformance",
+      "version": "1"
+    },
+    "map": null,
+    "paths": [
+      "src/app.rs"
+    ],
+    "policy": null,
+    "sources": {
+      "map": {
+        "digest": null,
+        "path": ".change-risk/map.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      },
+      "policy": {
+        "digest": null,
+        "path": ".change-risk/policy.yml",
+        "revision": "1111111111111111111111111111111111111111"
+      }
+    },
+    "version": "0.1"
+  }
+}

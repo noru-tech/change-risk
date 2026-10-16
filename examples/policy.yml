@@ -1,0 +1,36 @@
+# .change-risk/policy.yml: what each label means, which changes are pre-approved, who may
+# declare an emergency, and what each tier requires. Read from the target branch.
+version: "0.1"
+default_level: low
+levels:
+  auth: high
+  payments: high
+  personal-data: standard
+  personal-data:special: high
+  migrations: standard
+  infra: standard
+  ci: high
+  sarif:error: high
+  agent-authored: standard
+standard_changes:
+  - name: documentation
+    paths: ["/docs/", "*.md"]
+  - name: dependency lockfiles
+    paths: ["Cargo.lock", "package-lock.json"]
+emergency:
+  label: emergency
+  declarers: ["team:acme/sre"]
+tiers:
+  low:
+    min_human_approvals: 1
+    agent_review: allowed
+  standard:
+    min_human_approvals: 1
+  high:
+    min_human_approvals: 2
+    required_reviewer_teams: [acme/security]
+    required_checks: [test, sast]
+  emergency:
+    min_human_approvals: 0
+    retroactive_review_within_days: 3
+missing_tier: standard
