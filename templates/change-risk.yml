@@ -1,7 +1,7 @@
 # GitLab CI/CD component: assess every merge request's risk tier.
 #
 #   include:
-#     - remote: https://raw.githubusercontent.com/noru-tech/change-risk/v0.1.0/templates/change-risk.yml
+#     - remote: https://raw.githubusercontent.com/noru-tech/change-risk/v0.2.0/templates/change-risk.yml
 #       inputs:
 #         fail_on: emergency
 #
@@ -14,14 +14,14 @@ spec:
       default: test
       description: The stage the job runs in.
     version:
-      default: "0.1.0"
+      default: "0.2.0"
       description: The crisk release to install (without the leading v).
     image:
       default: alpine:3.20
       description: The job image; it needs sh and apk, or curl, git and xz already installed.
     signals:
       default: ""
-      description: Signal files, space-separated KIND=PATH (sarif, privacy-datamap, acc).
+      description: Signal files, space-separated KIND=PATH (sarif, privacy-datamap, acc, threat-model).
     fail_on:
       default: ""
       description: Fail when the tier is at or above this one (low, standard, high, emergency).

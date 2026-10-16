@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0          # the merge base and the base branch must be in the clone
       - id: risk
-        uses: noru-tech/change-risk@v0.1.0
+        uses: noru-tech/change-risk@v0.2.0
         with:
           fail-on: ""             # or `emergency`, to make an emergency visible as a failed check
           sarif: change-risk.sarif
@@ -35,7 +35,7 @@ actions to commit SHAs in production.
 
 | Input | Default | |
 | --- | --- | --- |
-| `version` | `0.1.0` | The crisk release to install |
+| `version` | `0.2.0` | The crisk release to install |
 | `verify-attestation` | `true` | Verify the release archive with `gh attestation verify` first |
 | `pr` | the event's pull request | Empty reads no forge |
 | `repository` | `github.repository` | |
