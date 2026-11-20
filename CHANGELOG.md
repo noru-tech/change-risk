@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+- Dates and times are handled with `jiff` instead of `chrono`, which is unmaintained
+  (RUSTSEC-2026-0543). Input and output formats are unchanged: times are strict RFC 3339 and print
+  in UTC to the second with a `Z` suffix, and dates are strict `YYYY-MM-DD`. The latest time is
+  now 9999-12-30T22:00:00Z, so `population` refuses a later `--since` or `--until` date as a
+  usage error.
+
 ## [0.2.0] - 2026-10-16
 
 ### Added

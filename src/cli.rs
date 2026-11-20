@@ -5,10 +5,11 @@ use crate::collect::{self, ForgeTarget};
 use crate::compile::{self, Inputs, Target};
 use crate::model::*;
 use crate::output::{self, Format};
+use crate::time::{at_utc, format_seconds, parse_date, parse_timestamp};
 use crate::{Exit, exit_for, failure, failure_with_hint};
 use anyhow::{Context, Result};
-use chrono::{DateTime, NaiveDate, SecondsFormat, Utc};
 use clap::{Args, CommandFactory, Parser, Subcommand};
+use jiff::Timestamp;
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -309,13 +310,11 @@ fn write(data: &str, path: Option<&Path>) -> Result<()> {
 /// When membership was observed: `CRISK_NOW` (tests), else the clock.
 fn now() -> Result<String> {
     if let Ok(v) = std::env::var("CRISK_NOW") {
-        let t = DateTime::parse_from_rfc3339(&v)
-            .map_err(|_| failure(Exit::Usage, "CRISK_NOW is not an RFC 3339 time"))?;
-        return Ok(t
-            .with_timezone(&Utc)
-            .to_rfc3339_opts(SecondsFormat::Secs, true));
+        let t = parse_timestamp(&v)
+            .ok_or_else(|| failure(Exit::Usage, "CRISK_NOW is not an RFC 3339 time"))?;
+        return Ok(format_seconds(t));
     }
-    Ok(Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true))
+    Ok(format_seconds(Timestamp::now()))
 }
 
 fn env(name: &str) -> Option<String> {
@@ -571,21 +570,21 @@ fn inputs(
     })
 }
 
-fn day(s: &str, end: bool) -> Result<DateTime<Utc>> {
-    let d = s.parse::<NaiveDate>().map_err(|_| {
+fn day(s: &str, end: bool) -> Result<Timestamp> {
+    let invalid = || {
         failure_with_hint(
             Exit::Usage,
             format!("invalid date: {s}"),
             "use a calendar date such as 2026-09-30",
         )
-    })?;
+    };
+    let d = parse_date(s).ok_or_else(invalid)?;
     let t = if end {
-        d.and_hms_opt(23, 59, 59)
+        at_utc(d, 23, 59, 59)
     } else {
-        d.and_hms_opt(0, 0, 0)
-    }
-    .expect("a valid time of day");
-    Ok(t.and_utc())
+        at_utc(d, 0, 0, 0)
+    };
+    t.ok_or_else(invalid)
 }
 
 fn run(cli: Cli) -> Result<Exit> {

@@ -20,6 +20,7 @@ pub mod pattern;
 pub mod population;
 pub mod schema;
 pub mod signals;
+pub mod time;
 
 use std::borrow::Cow;
 
