@@ -6,12 +6,14 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-20
+
 ### Changed
 - Dates and times are handled with `jiff` instead of `chrono`, which is unmaintained
   (RUSTSEC-2026-0543). Input and output formats are unchanged: times are strict RFC 3339 and print
   in UTC to the second with a `Z` suffix, and dates are strict `YYYY-MM-DD`. The latest time is
   now 9999-12-30T22:00:00Z, so `population` refuses a later `--since` or `--until` date as a
-  usage error.
+  usage error. For library users, `population::population` takes `jiff::Timestamp` window bounds.
 
 ## [0.2.0] - 2026-10-16
 
@@ -41,6 +43,7 @@ All notable changes to this project are documented here. The format is based on
     retroactive review is due.
   - A GitHub Action and a GitLab CI/CD component.
 
-[Unreleased]: https://github.com/noru-tech/change-risk/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/noru-tech/change-risk/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/noru-tech/change-risk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/noru-tech/change-risk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/noru-tech/change-risk/releases/tag/v0.1.0
