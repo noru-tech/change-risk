@@ -101,9 +101,9 @@ impl Git {
             .trim()
             .parse()
             .context("git log did not print a commit time")?;
-        let at = chrono::DateTime::<chrono::Utc>::from_timestamp(seconds, 0)
-            .context("the commit time is out of range")?;
-        Ok(at.format("%Y-%m-%d").to_string())
+        let at =
+            jiff::Timestamp::from_second(seconds).context("the commit time is out of range")?;
+        Ok(crate::time::utc_date(at))
     }
 
     /// The bytes of `path` at `rev`, or None when it does not exist there.

@@ -7,19 +7,18 @@
 
 use crate::collect::forge::Forge;
 use crate::model::*;
+use crate::time::{add_days, format_seconds, parse_timestamp};
 use crate::{Exit, failure_with_hint};
 use anyhow::{Context, Result};
-use chrono::{DateTime, Duration, SecondsFormat, Utc};
+use jiff::Timestamp;
 use serde_json::{Value, json};
 
-fn parse(at: &str) -> Result<DateTime<Utc>> {
-    Ok(DateTime::parse_from_rfc3339(at)
-        .with_context(|| format!("{at:?} is not an RFC 3339 time"))?
-        .with_timezone(&Utc))
+fn parse(at: &str) -> Result<Timestamp> {
+    parse_timestamp(at).with_context(|| format!("{at:?} is not an RFC 3339 time"))
 }
 
-fn format(t: DateTime<Utc>) -> String {
-    t.to_rfc3339_opts(SecondsFormat::Secs, true)
+fn format(t: Timestamp) -> String {
+    format_seconds(t)
 }
 
 /// The population of `forge`'s `repository` merged in `[since, until]`, under `policy`.
@@ -27,8 +26,8 @@ pub fn population(
     forge: &dyn Forge,
     repository: &str,
     policy: &Policy,
-    since: DateTime<Utc>,
-    until: DateTime<Utc>,
+    since: Timestamp,
+    until: Timestamp,
     now: &str,
 ) -> Result<Value> {
     let rule = policy.emergency.as_ref().ok_or_else(|| {
@@ -85,7 +84,10 @@ pub fn population(
             "declared_at": declared.map(|e| e.at.clone()),
             "allowed": allowed.flatten(),
             "review_within_days": days,
-            "review_due": days.map(|d| format(merged + Duration::days(i64::from(d)))),
+            "review_due": days
+                .map(|d| add_days(merged, d).context("the review due date is out of range"))
+                .transpose()?
+                .map(format),
         }));
     }
     changes.sort_by(|a, b| {
